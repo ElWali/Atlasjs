@@ -26,7 +26,7 @@ for mobile-friendly interactive maps</title>
 
   <script>
     // Create map centered on a location
-    const map = L.map('map').setView([51.505, -0.09], 13);
+    const map = L.map('map').setView([27.9333, -12.9167], 13);
 
     // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -34,7 +34,7 @@ for mobile-friendly interactive maps</title>
     }).addTo(map);
 
     // Add a marker
-    L.marker([51.5, -0.09])
+    L.marker([27.9333, -12.9167])
       .addTo(map)
       .bindPopup('Hello! This is an Atlas.js map in a single HTML file.')
       .openPopup();
