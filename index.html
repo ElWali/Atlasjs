@@ -35,9 +35,8 @@ for mobile-friendly interactive maps</title>
 
     // Add a marker
     L.marker([27.9333, -12.9167])
-      .addTo(map)
-      .bindPopup('Hello! This is an Atlas.js map in a single HTML file.')
-      .openPopup();
+    {alt: 'Tarfaya'}).addTo(map) // "Tarfaya" is the accessible name of this marker
+  .bindPopup('Tarfaya, Morocco 🇲🇦 is the birthplace of Atlas.js!');
   </script>
 </body>
 </html>
