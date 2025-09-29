@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Atlas.js is an open-source JavaScript library
+for mobile-friendly interactive maps</title>
+
+  <!-- ✅ Local Atlas CSS -->
+  <link rel="stylesheet" href="leaflet.css" />
+
+  <style>
+    /* Ensure the map takes full height */
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- ✅ Local Atlas JS -->
+  <script src="leaflet-src.js"></script>
+
+  <script>
+    // Create map centered on a location
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add a marker
+    L.marker([51.5, -0.09])
+      .addTo(map)
+      .bindPopup('Hello! This is an Atlas.js map in a single HTML file.')
+      .openPopup();
+  </script>
+</body>
+</html>
