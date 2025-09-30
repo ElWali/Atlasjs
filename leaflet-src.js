@@ -3256,7 +3256,7 @@
   var Attribution = Control.extend({
 	options: {
 		position: 'bottomright',
-		prefix: '<a href="https://www.wikipedia.org/Atlas" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
+		prefix: '<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
 	},
 	initialize: function (options) {
 		setOptions(this, options);
