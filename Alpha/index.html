@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fullscreen OSM Map</title>
+  <style>
+    html, body, #map {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script type="module">
+    // Import the library (assuming it's saved as atlas.js)
+    import L from './leafletalpha.js';
+
+    // Create the map
+    const map = new L.Map('map', {
+      center: [51.505, -0.09], // London
+      zoom: 13,
+      zoomControl: true,
+      attributionControl: true
+    });
+
+    // Add OpenStreetMap tile layer
+    L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+  </script>
+</body>
+</html>
