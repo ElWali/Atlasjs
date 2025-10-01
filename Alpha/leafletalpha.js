@@ -6972,6 +6972,3 @@ export {
   L as default,
   version,
 };
-//# sourceMappingURL=leaflet.js.map
-
-```
