@@ -3,13 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MiniAtlas — Professional Mapping Library (Leaflet-inspired)</title>
-  <link rel="stylesheet" href="MiniAtlas.css" />
+  <title>Atlas.js - Professional Mapping Library</title>
+  <link rel="stylesheet" href="leaflet.css" />
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
 </head>
 <body>
   <div id="map" tabindex="0" role="application" aria-label="Interactive map"></div>
 
-  <script src="MiniAtlas.js"></script>
+  <script src="leaflet-src.js"></script>
   <script src="example.js"></script>
 </body>
 </html>
