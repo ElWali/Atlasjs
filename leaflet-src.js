@@ -3,7 +3,7 @@
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.leaflet = {}));
 })(this, (function (exports) { 'use strict';
-  var version = "1.9.4";
+  var version = "0.0.1";
   function extend(dest) {
 	var i, j, len, src;
 	for (j = 1, len = arguments.length; j < len; j++) {
