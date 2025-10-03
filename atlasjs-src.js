@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.atlas = {}));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.leaflet = {}));
 })(this, (function (exports) { 'use strict';
   var version = "0.0.1";
   function extend(dest) {
@@ -33,10 +33,10 @@
   }
   var lastId = 0;
   function stamp(obj) {
-	if (!('_atlas_id' in obj)) {
-		obj['_atlas_id'] = ++lastId;
+	if (!('_leaflet_id' in obj)) {
+		obj['_leaflet_id'] = ++lastId;
 	}
-	return obj._atlas_id;
+	return obj._leaflet_id;
   }
   function throttle(fn, time, context) {
 	var lock, args, wrapperFn, later;
@@ -1377,7 +1377,7 @@
 		(scale ? ' scale(' + scale + ')' : '');
   }
   function setPosition(el, point) {
-	el._atlas_pos = point;
+	el._leaflet_pos = point;
 	if (Browser.any3d) {
 		setTransform(el, point);
 	} else {
@@ -1386,7 +1386,7 @@
 	}
   }
   function getPosition(el) {
-	return el._atlas_pos || new Point(0, 0);
+	return el._leaflet_pos || new Point(0, 0);
   }
   var disableTextSelection;
   var enableTextSelection;
@@ -1498,7 +1498,7 @@
 	}
 	return this;
   }
-  var eventsKey = '_atlas_events';
+  var eventsKey = '_leaflet_events';
   function off(obj, types, fn, context) {
 	if (arguments.length === 1) {
 		batchRemove(obj);
@@ -1596,7 +1596,7 @@
   }
   function disableClickPropagation(el) {
 	on(el, 'mousedown touchstart dblclick contextmenu', stopPropagation);
-	el['_atlas_disable_click'] = true;
+	el['_leaflet_disable_click'] = true;
 	return this;
   }
   function preventDefault(e) {
@@ -1875,7 +1875,7 @@
 			this.fire('movestart');
 		}
 		if (options.animate !== false) {
-			addClass(this._mapPane, 'atlas-pan-anim');
+			addClass(this._mapPane, 'leaflet-pan-anim');
 			var newPos = this._getMapPanePos().subtract(offset).round();
 			this._panAnim.run(this._mapPane, newPos, options.duration || 0.25, options.easeLinearity);
 		} else {
@@ -2083,7 +2083,7 @@
 		return this;
 	},
 	_handleGeolocationError: function (error) {
-		if (!this._container._atlas_id) { return; }
+		if (!this._container._leaflet_id) { return; }
 		var c = error.code,
 		    message = error.message ||
 		            (c === 1 ? 'permission denied' :
@@ -2097,7 +2097,7 @@
 		});
 	},
 	_handleGeolocationResponse: function (pos) {
-		if (!this._container._atlas_id) { return; }
+		if (!this._container._leaflet_id) { return; }
 		var lat = pos.coords.latitude,
 		    lng = pos.coords.longitude,
 		    latlng = new LatLng(lat, lng),
@@ -2131,14 +2131,14 @@
 	remove: function () {
 		this._initEvents(true);
 		if (this.options.maxBounds) { this.off('moveend', this._panInsideMaxBounds); }
-		if (this._containerId !== this._container._atlas_id) {
+		if (this._containerId !== this._container._leaflet_id) {
 			throw new Error('Map container is being reused by another instance');
 		}
 		try {
-			delete this._container._atlas_id;
+			delete this._container._leaflet_id;
 			delete this._containerId;
 		} catch (e) {
-			this._container._atlas_id = undefined;
+			this._container._leaflet_id = undefined;
 			this._containerId = undefined;
 		}
 		if (this._locationWatchId !== undefined) {
@@ -2171,7 +2171,7 @@
 		return this;
 	},
 	createPane: function (name, container) {
-		var className = 'atlas-pane' + (name ? ' atlas-' + name.replace('Pane', '') + '-pane' : ''),
+		var className = 'leaflet-pane' + (name ? ' leaflet-' + name.replace('Pane', '') + '-pane' : ''),
 		    pane = create$1('div', className, container || this._mapPane);
 		if (name) {
 			this._panes[name] = pane;
@@ -2314,7 +2314,7 @@
 		var container = this._container = get(id);
 		if (!container) {
 			throw new Error('Map container not found.');
-		} else if (container._atlas_id) {
+		} else if (container._leaflet_id) {
 			throw new Error('Map container is already initialized.');
 		}
 		on(container, 'scroll', this._onScroll, this);
@@ -2323,12 +2323,12 @@
 	_initLayout: function () {
 		var container = this._container;
 		this._fadeAnimated = this.options.fadeAnimation && Browser.any3d;
-		addClass(container, 'atlas-container' +
-			(Browser.touch ? ' atlas-touch' : '') +
-			(Browser.retina ? ' atlas-retina' : '') +
-			(Browser.ielt9 ? ' atlas-oldie' : '') +
-			(Browser.safari ? ' atlas-safari' : '') +
-			(this._fadeAnimated ? ' atlas-fade-anim' : ''));
+		addClass(container, 'leaflet-container' +
+			(Browser.touch ? ' leaflet-touch' : '') +
+			(Browser.retina ? ' leaflet-retina' : '') +
+			(Browser.ielt9 ? ' leaflet-oldie' : '') +
+			(Browser.safari ? ' leaflet-safari' : '') +
+			(this._fadeAnimated ? ' leaflet-fade-anim' : ''));
 		var position = getStyle(container, 'position');
 		if (position !== 'absolute' && position !== 'relative' && position !== 'fixed' && position !== 'sticky') {
 			container.style.position = 'relative';
@@ -2350,8 +2350,8 @@
 		this.createPane('tooltipPane');
 		this.createPane('popupPane');
 		if (!this.options.markerZoomAnimation) {
-			addClass(panes.markerPane, 'atlas-zoom-hide');
-			addClass(panes.shadowPane, 'atlas-zoom-hide');
+			addClass(panes.markerPane, 'leaflet-zoom-hide');
+			addClass(panes.shadowPane, 'leaflet-zoom-hide');
 		}
 	},
 	_resetView: function (center, zoom, noMoveStart) {
@@ -2481,13 +2481,13 @@
 	},
 	_isClickDisabled: function (el) {
 		while (el && el !== this._container) {
-			if (el['_atlas_disable_click']) { return true; }
+			if (el['_leaflet_disable_click']) { return true; }
 			el = el.parentNode;
 		}
 	},
 	_handleDOMEvent: function (e) {
 		var el = (e.target || e.srcElement);
-		if (!this._loaded || el['_atlas_disable_events'] || e.type === 'click' && this._isClickDisabled(el)) {
+		if (!this._loaded || el['_leaflet_disable_events'] || e.type === 'click' && this._isClickDisabled(el)) {
 			return;
 		}
 		var type = e.type;
@@ -2633,7 +2633,7 @@
 		this.fire('move');
 	},
 	_onPanTransitionEnd: function () {
-		removeClass(this._mapPane, 'atlas-pan-anim');
+		removeClass(this._mapPane, 'leaflet-pan-anim');
 		this.fire('moveend');
 	},
 	_tryAnimatedPan: function (center, options) {
@@ -2643,7 +2643,7 @@
 		return true;
 	},
 	_createAnimProxy: function () {
-		var proxy = this._proxy = create$1('div', 'atlas-proxy atlas-zoom-animated');
+		var proxy = this._proxy = create$1('div', 'leaflet-proxy leaflet-zoom-animated');
 		this._panes.mapPane.appendChild(proxy);
 		this.on('zoomanim', function (e) {
 			var prop = TRANSFORM,
@@ -2672,7 +2672,7 @@
 		}
 	},
 	_nothingToAnimate: function () {
-		return !this._container.getElementsByClassName('atlas-zoom-animated').length;
+		return !this._container.getElementsByClassName('leaflet-zoom-animated').length;
 	},
 	_tryAnimatedZoom: function (center, zoom, options) {
 		if (this._animatingZoom) { return true; }
@@ -2695,7 +2695,7 @@
 			this._animatingZoom = true;
 			this._animateToCenter = center;
 			this._animateToZoom = zoom;
-			addClass(this._mapPane, 'atlas-zoom-anim');
+			addClass(this._mapPane, 'leaflet-zoom-anim');
 		}
 		this.fire('zoomanim', {
 			center: center,
@@ -2711,7 +2711,7 @@
 	_onZoomTransitionEnd: function () {
 		if (!this._animatingZoom) { return; }
 		if (this._mapPane) {
-			removeClass(this._mapPane, 'atlas-zoom-anim');
+			removeClass(this._mapPane, 'leaflet-zoom-anim');
 		}
 		this._animatingZoom = false;
 		this._move(this._animateToCenter, this._animateToZoom, undefined, true);
@@ -2756,7 +2756,7 @@
 		var container = this._container = this.onAdd(map),
 		    pos = this.getPosition(),
 		    corner = map._controlCorners[pos];
-		addClass(container, 'atlas-control');
+		addClass(container, 'leaflet-control');
 		if (pos.indexOf('bottom') !== -1) {
 			corner.insertBefore(container, corner.firstChild);
 		} else {
@@ -2797,7 +2797,7 @@
 	},
 	_initControlPos: function () {
 		var corners = this._controlCorners = {},
-		    l = 'atlas-',
+		    l = 'leaflet-',
 		    container = this._controlContainer =
 		            create$1('div', l + 'control-container', this._container);
 		function createCorner(vSide, hSide) {
@@ -2880,24 +2880,24 @@
 		return (this._map) ? this._update() : this;
 	},
 	expand: function () {
-		addClass(this._container, 'atlas-control-layers-expanded');
+		addClass(this._container, 'leaflet-control-layers-expanded');
 		this._section.style.height = null;
 		var acceptableHeight = this._map.getSize().y - (this._container.offsetTop + 50);
 		if (acceptableHeight < this._section.clientHeight) {
-			addClass(this._section, 'atlas-control-layers-scrollbar');
+			addClass(this._section, 'leaflet-control-layers-scrollbar');
 			this._section.style.height = acceptableHeight + 'px';
 		} else {
-			removeClass(this._section, 'atlas-control-layers-scrollbar');
+			removeClass(this._section, 'leaflet-control-layers-scrollbar');
 		}
 		this._checkDisabledLayers();
 		return this;
 	},
 	collapse: function () {
-		removeClass(this._container, 'atlas-control-layers-expanded');
+		removeClass(this._container, 'leaflet-control-layers-expanded');
 		return this;
 	},
 	_initLayout: function () {
-		var className = 'atlas-control-layers',
+		var className = 'leaflet-control-layers',
 		    container = this._container = create$1('div', className),
 		    collapsed = this.options.collapsed;
 		container.setAttribute('aria-haspopup', true);
@@ -2994,7 +2994,7 @@
 		}
 	},
 	_createRadioElement: function (name, checked) {
-		var radioHtml = '<input type="radio" class="atlas-control-layers-selector" name="' +
+		var radioHtml = '<input type="radio" class="leaflet-control-layers-selector" name="' +
 				name + '"' + (checked ? ' checked="checked"' : '') + '/>';
 		var radioFragment = document.createElement('div');
 		radioFragment.innerHTML = radioHtml;
@@ -3007,10 +3007,10 @@
 		if (obj.overlay) {
 			input = document.createElement('input');
 			input.type = 'checkbox';
-			input.className = 'atlas-control-layers-selector';
+			input.className = 'leaflet-control-layers-selector';
 			input.defaultChecked = checked;
 		} else {
-			input = this._createRadioElement('atlas-base-layers_' + stamp(this), checked);
+			input = this._createRadioElement('leaflet-base-layers_' + stamp(this), checked);
 		}
 		this._layerControlInputs.push(input);
 		input.layerId = stamp(obj.layer);
@@ -3099,8 +3099,8 @@
 		zoomOutTitle: 'Zoom out'
 	},
 	onAdd: function (map) {
-		var zoomName = 'atlas-control-zoom',
-		    container = create$1('div', zoomName + ' atlas-bar'),
+		var zoomName = 'leaflet-control-zoom',
+		    container = create$1('div', zoomName + ' leaflet-bar'),
 		    options = this.options;
 		this._zoomInButton  = this._createButton(options.zoomInText, options.zoomInTitle,
 		        zoomName + '-in',  container, this._zoomIn);
@@ -3148,7 +3148,7 @@
 	},
 	_updateDisabled: function () {
 		var map = this._map,
-		    className = 'atlas-disabled';
+		    className = 'leaflet-disabled';
 		removeClass(this._zoomInButton, className);
 		removeClass(this._zoomOutButton, className);
 		this._zoomInButton.setAttribute('aria-disabled', 'false');
@@ -3183,7 +3183,7 @@
 		imperial: true
 	},
 	onAdd: function (map) {
-		var className = 'atlas-control-scale',
+		var className = 'leaflet-control-scale',
 		    container = create$1('div', className),
 		    options = this.options;
 		this._addScales(options, className + '-line', container);
@@ -3252,11 +3252,11 @@
   var scale = function (options) {
 	return new Scale(options);
   };
-  var ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="atlas-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"/><path fill="#FFD500" d="M0 4h12v3H0z"/><path fill="#E0BC00" d="M0 7h12v1H0z"/></svg>';
+  var ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"/><path fill="#FFD500" d="M0 4h12v3H0z"/><path fill="#E0BC00" d="M0 7h12v1H0z"/></svg>';
   var Attribution = Control.extend({
 	options: {
 		position: 'bottomright',
-		prefix: '<a href="https://atlasjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
+		prefix: '<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
 	},
 	initialize: function (options) {
 		setOptions(this, options);
@@ -3264,7 +3264,7 @@
 	},
 	onAdd: function (map) {
 		map.attributionControl = this;
-		this._container = create$1('div', 'atlas-control-attribution');
+		this._container = create$1('div', 'leaflet-control-attribution');
 		disableClickPropagation(this._container);
 		for (var i in map._layers) {
 			if (map._layers[i].getAttribution) {
@@ -3398,7 +3398,7 @@
 	_onDown: function (e) {
 		if (!this._enabled) { return; }
 		this._moved = false;
-		if (hasClass(this._element, 'atlas-zoom-anim')) { return; }
+		if (hasClass(this._element, 'leaflet-zoom-anim')) { return; }
 		if (e.touches && e.touches.length !== 1) {
 			if (Draggable._dragging === this) {
 				this.finishDrag();
@@ -3439,12 +3439,12 @@
 		if (!this._moved) {
 			this.fire('dragstart');
 			this._moved = true;
-			addClass(document.body, 'atlas-dragging');
+			addClass(document.body, 'leaflet-dragging');
 			this._lastTarget = e.target || e.srcElement;
 			if (window.SVGElementInstance && this._lastTarget instanceof window.SVGElementInstance) {
 				this._lastTarget = this._lastTarget.correspondingUseElement;
 			}
-			addClass(this._lastTarget, 'atlas-drag-target');
+			addClass(this._lastTarget, 'leaflet-drag-target');
 		}
 		this._newPos = this._startPos.add(offset);
 		this._moving = true;
@@ -3462,9 +3462,9 @@
 		this.finishDrag();
 	},
 	finishDrag: function (noInertia) {
-		removeClass(document.body, 'atlas-dragging');
+		removeClass(document.body, 'leaflet-dragging');
 		if (this._lastTarget) {
-			removeClass(this._lastTarget, 'atlas-drag-target');
+			removeClass(this._lastTarget, 'leaflet-drag-target');
 			this._lastTarget = null;
 		}
 		off(document, 'mousemove touchmove', this._onMove, this);
@@ -4145,7 +4145,7 @@
 		var size = toPoint(sizeOption),
 		    anchor = toPoint(name === 'shadow' && options.shadowAnchor || options.iconAnchor ||
 		            size && size.divideBy(2, true));
-		img.className = 'atlas-marker-' + name + ' ' + (options.className || '');
+		img.className = 'leaflet-marker-' + name + ' ' + (options.className || '');
 		if (anchor) {
 			img.style.marginLeft = (-anchor.x) + 'px';
 			img.style.marginTop  = (-anchor.y) + 'px';
@@ -4193,15 +4193,15 @@
 		return path && strip(path, /^(.*)marker-icon\.png$/, 1);
 	},
 	_detectIconPath: function () {
-		var el = create$1('div',  'atlas-default-icon-path', document.body);
+		var el = create$1('div',  'leaflet-default-icon-path', document.body);
 		var path = getStyle(el, 'background-image') ||
 		           getStyle(el, 'backgroundImage');	// IE8
 		document.body.removeChild(el);
 		path = this._stripUrl(path);
 		if (path) { return path; }
-		var link = document.querySelector('link[href$="atlas.css"]');
+		var link = document.querySelector('link[href$="leaflet.css"]');
 		if (!link) { return ''; }
-		return link.href.substring(0, link.href.length - 'atlas.css'.length - 1);
+		return link.href.substring(0, link.href.length - 'leaflet.css'.length - 1);
 	}
   });
   /*
@@ -4234,7 +4234,7 @@
 			drag: this._onDrag,
 			dragend: this._onDragEnd
 		}, this).enable();
-		addClass(icon, 'atlas-marker-draggable');
+		addClass(icon, 'leaflet-marker-draggable');
 	},
 	removeHooks: function () {
 		this._draggable.off({
@@ -4244,7 +4244,7 @@
 			dragend: this._onDragEnd
 		}, this).disable();
 		if (this._marker._icon) {
-			removeClass(this._marker._icon, 'atlas-marker-draggable');
+			removeClass(this._marker._icon, 'leaflet-marker-draggable');
 		}
 	},
 	moved: function () {
@@ -4355,11 +4355,11 @@
 		keyboard: true,
 		// @option title: String = ''
 		// Text for the browser tooltip that appear on marker hover (no tooltip by default).
-		// [Useful for accessibility](https://atlasjs.com/examples/accessibility/#markers-must-be-labelled).
+		// [Useful for accessibility](https://leafletjs.com/examples/accessibility/#markers-must-be-labelled).
 		title: '',
 		// @option alt: String = 'Marker'
 		// Text for the `alt` attribute of the icon image.
-		// [Useful for accessibility](https://atlasjs.com/examples/accessibility/#markers-must-be-labelled).
+		// [Useful for accessibility](https://leafletjs.com/examples/accessibility/#markers-must-be-labelled).
 		alt: 'Marker',
 		// @option zIndexOffset: Number = 0
 		// By default, marker images zIndex is set automatically based on its latitude. Use this option if you want to put the marker on top of all others (or below), specifying a high value like `1000` (or high negative value, respectively).
@@ -4462,7 +4462,7 @@
 	},
 	_initIcon: function () {
 		var options = this.options,
-		    classToAdd = 'atlas-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
+		    classToAdd = 'leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
 		var icon = options.icon.createIcon(this._icon),
 		    addIcon = false;
 		if (icon !== this._icon) {
@@ -4555,7 +4555,7 @@
 	},
 	_initInteraction: function () {
 		if (!this.options.interactive) { return; }
-		addClass(this._icon, 'atlas-interactive');
+		addClass(this._icon, 'leaflet-interactive');
 		this.addInteractiveTarget(this._icon);
 		if (MarkerDrag) {
 			var draggable = this.options.draggable;
@@ -5311,7 +5311,7 @@
 			}
 		}
 		if (this.options.interactive) {
-			addClass(this._image, 'atlas-interactive');
+			addClass(this._image, 'leaflet-interactive');
 			this.addInteractiveTarget(this._image);
 		}
 		this.getPane().appendChild(this._image);
@@ -5386,8 +5386,8 @@
 	_initImage: function () {
 		var wasElementSupplied = this._url.tagName === 'IMG';
 		var img = this._image = wasElementSupplied ? this._url : create$1('img');
-		addClass(img, 'atlas-image-layer');
-		if (this._zoomAnimated) { addClass(img, 'atlas-zoom-animated'); }
+		addClass(img, 'leaflet-image-layer');
+		if (this._zoomAnimated) { addClass(img, 'leaflet-zoom-animated'); }
 		if (this.options.className) { addClass(img, this.options.className); }
 		img.onselectstart = falseFn;
 		img.onmousemove = falseFn;
@@ -5455,8 +5455,8 @@
 	_initImage: function () {
 		var wasElementSupplied = this._url.tagName === 'VIDEO';
 		var vid = this._image = wasElementSupplied ? this._url : create$1('video');
-		addClass(vid, 'atlas-image-layer');
-		if (this._zoomAnimated) { addClass(vid, 'atlas-zoom-animated'); }
+		addClass(vid, 'leaflet-image-layer');
+		if (this._zoomAnimated) { addClass(vid, 'leaflet-zoom-animated'); }
 		if (this.options.className) { addClass(vid, this.options.className); }
 		vid.onselectstart = falseFn;
 		vid.onmousemove = falseFn;
@@ -5491,8 +5491,8 @@
   var SVGOverlay = ImageOverlay.extend({
 	_initImage: function () {
 		var el = this._image = this._url;
-		addClass(el, 'atlas-image-layer');
-		if (this._zoomAnimated) { addClass(el, 'atlas-zoom-animated'); }
+		addClass(el, 'leaflet-image-layer');
+		if (this._zoomAnimated) { addClass(el, 'leaflet-zoom-animated'); }
 		if (this.options.className) { addClass(el, this.options.className); }
 		el.onselectstart = falseFn;
 		el.onmousemove = falseFn;
@@ -5564,7 +5564,7 @@
 		}
 		this.bringToFront();
 		if (this.options.interactive) {
-			addClass(this._container, 'atlas-interactive');
+			addClass(this._container, 'leaflet-interactive');
 			this.addInteractiveTarget(this._container);
 		}
 	},
@@ -5576,7 +5576,7 @@
 			remove(this._container);
 		}
 		if (this.options.interactive) {
-			removeClass(this._container, 'atlas-interactive');
+			removeClass(this._container, 'leaflet-interactive');
 			this.removeInteractiveTarget(this._container);
 		}
 	},
@@ -5782,10 +5782,10 @@
 		return events;
 	},
 	_initLayout: function () {
-		var prefix = 'atlas-popup',
+		var prefix = 'leaflet-popup',
 		    container = this._container = create$1('div',
 			prefix + ' ' + (this.options.className || '') +
-			' atlas-zoom-animated');
+			' leaflet-zoom-animated');
 		var wrapper = this._wrapper = create$1('div', prefix + '-content-wrapper', container);
 		this._contentNode = create$1('div', prefix + '-content', wrapper);
 		disableClickPropagation(container);
@@ -5818,7 +5818,7 @@
 		style.height = '';
 		var height = container.offsetHeight,
 		    maxHeight = this.options.maxHeight,
-		    scrolledClass = 'atlas-popup-scrolled';
+		    scrolledClass = 'leaflet-popup-scrolled';
 		if (maxHeight && height > maxHeight) {
 			style.height = maxHeight + 'px';
 			addClass(container, scrolledClass);
@@ -6019,11 +6019,11 @@
 		return events;
 	},
 	_initLayout: function () {
-		var prefix = 'atlas-tooltip',
-		    className = prefix + ' ' + (this.options.className || '') + ' atlas-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
+		var prefix = 'leaflet-tooltip',
+		    className = prefix + ' ' + (this.options.className || '') + ' leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
 		this._contentNode = this._container = create$1('div', className);
 		this._container.setAttribute('role', 'tooltip');
-		this._container.setAttribute('id', 'atlas-tooltip-' + stamp(this));
+		this._container.setAttribute('id', 'leaflet-tooltip-' + stamp(this));
 	},
 	_updateLayout: function () {},
 	_adjustPan: function () {},
@@ -6063,11 +6063,11 @@
 			subY = tooltipHeight / 2;
 		}
 		pos = pos.subtract(toPoint(subX, subY, true)).add(offset).add(anchor);
-		removeClass(container, 'atlas-tooltip-right');
-		removeClass(container, 'atlas-tooltip-left');
-		removeClass(container, 'atlas-tooltip-top');
-		removeClass(container, 'atlas-tooltip-bottom');
-		addClass(container, 'atlas-tooltip-' + direction);
+		removeClass(container, 'leaflet-tooltip-right');
+		removeClass(container, 'leaflet-tooltip-left');
+		removeClass(container, 'leaflet-tooltip-top');
+		removeClass(container, 'leaflet-tooltip-bottom');
+		addClass(container, 'leaflet-tooltip-' + direction);
 		setPosition(container, pos);
 	},
 	_updatePosition: function () {
@@ -6240,7 +6240,7 @@
 		iconSize: [12, 12],
 		html: false,
 		bgPos: null,
-		className: 'atlas-div-icon'
+		className: 'leaflet-div-icon'
 	},
 	createIcon: function (oldIcon) {
 		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
@@ -6330,3 +6330,2068 @@
 		this._updateZIndex();
 		return this;
 	},
+	isLoading: function () {
+		return this._loading;
+	},
+	redraw: function () {
+		if (this._map) {
+			this._removeAllTiles();
+			var tileZoom = this._clampZoom(this._map.getZoom());
+			if (tileZoom !== this._tileZoom) {
+				this._tileZoom = tileZoom;
+				this._updateLevels();
+			}
+			this._update();
+		}
+		return this;
+	},
+	getEvents: function () {
+		var events = {
+			viewprereset: this._invalidateAll,
+			viewreset: this._resetView,
+			zoom: this._resetView,
+			moveend: this._onMoveEnd
+		};
+		if (!this.options.updateWhenIdle) {
+			if (!this._onMove) {
+				this._onMove = throttle(this._onMoveEnd, this.options.updateInterval, this);
+			}
+			events.move = this._onMove;
+		}
+		if (this._zoomAnimated) {
+			events.zoomanim = this._animateZoom;
+		}
+		return events;
+	},
+	createTile: function () {
+		return document.createElement('div');
+	},
+	getTileSize: function () {
+		var s = this.options.tileSize;
+		return s instanceof Point ? s : new Point(s, s);
+	},
+	_updateZIndex: function () {
+		if (this._container && this.options.zIndex !== undefined && this.options.zIndex !== null) {
+			this._container.style.zIndex = this.options.zIndex;
+		}
+	},
+	_setAutoZIndex: function (compare) {
+		var layers = this.getPane().children,
+		    edgeZIndex = -compare(-Infinity, Infinity);
+		for (var i = 0, len = layers.length, zIndex; i < len; i++) {
+			zIndex = layers[i].style.zIndex;
+			if (layers[i] !== this._container && zIndex) {
+				edgeZIndex = compare(edgeZIndex, +zIndex);
+			}
+		}
+		if (isFinite(edgeZIndex)) {
+			this.options.zIndex = edgeZIndex + compare(-1, 1);
+			this._updateZIndex();
+		}
+	},
+	_updateOpacity: function () {
+		if (!this._map) { return; }
+		if (Browser.ielt9) { return; }
+		setOpacity(this._container, this.options.opacity);
+		var now = +new Date(),
+		    nextFrame = false,
+		    willPrune = false;
+		for (var key in this._tiles) {
+			var tile = this._tiles[key];
+			if (!tile.current || !tile.loaded) { continue; }
+			var fade = Math.min(1, (now - tile.loaded) / 200);
+			setOpacity(tile.el, fade);
+			if (fade < 1) {
+				nextFrame = true;
+			} else {
+				if (tile.active) {
+					willPrune = true;
+				} else {
+					this._onOpaqueTile(tile);
+				}
+				tile.active = true;
+			}
+		}
+		if (willPrune && !this._noPrune) { this._pruneTiles(); }
+		if (nextFrame) {
+			cancelAnimFrame(this._fadeFrame);
+			this._fadeFrame = requestAnimFrame(this._updateOpacity, this);
+		}
+	},
+	_onOpaqueTile: falseFn,
+	_initContainer: function () {
+		if (this._container) { return; }
+		this._container = create$1('div', 'leaflet-layer ' + (this.options.className || ''));
+		this._updateZIndex();
+		if (this.options.opacity < 1) {
+			this._updateOpacity();
+		}
+		this.getPane().appendChild(this._container);
+	},
+	_updateLevels: function () {
+		var zoom = this._tileZoom,
+		    maxZoom = this.options.maxZoom;
+		if (zoom === undefined) { return undefined; }
+		for (var z in this._levels) {
+			z = Number(z);
+			if (this._levels[z].el.children.length || z === zoom) {
+				this._levels[z].el.style.zIndex = maxZoom - Math.abs(zoom - z);
+				this._onUpdateLevel(z);
+			} else {
+				remove(this._levels[z].el);
+				this._removeTilesAtZoom(z);
+				this._onRemoveLevel(z);
+				delete this._levels[z];
+			}
+		}
+		var level = this._levels[zoom],
+		    map = this._map;
+		if (!level) {
+			level = this._levels[zoom] = {};
+			level.el = create$1('div', 'leaflet-tile-container leaflet-zoom-animated', this._container);
+			level.el.style.zIndex = maxZoom;
+			level.origin = map.project(map.unproject(map.getPixelOrigin()), zoom).round();
+			level.zoom = zoom;
+			this._setZoomTransform(level, map.getCenter(), map.getZoom());
+			falseFn(level.el.offsetWidth);
+			this._onCreateLevel(level);
+		}
+		this._level = level;
+		return level;
+	},
+	_onUpdateLevel: falseFn,
+	_onRemoveLevel: falseFn,
+	_onCreateLevel: falseFn,
+	_pruneTiles: function () {
+		if (!this._map) {
+			return;
+		}
+		var key, tile;
+		var zoom = this._map.getZoom();
+		if (zoom > this.options.maxZoom ||
+			zoom < this.options.minZoom) {
+			this._removeAllTiles();
+			return;
+		}
+		for (key in this._tiles) {
+			tile = this._tiles[key];
+			tile.retain = tile.current;
+		}
+		for (key in this._tiles) {
+			tile = this._tiles[key];
+			if (tile.current && !tile.active) {
+				var coords = tile.coords;
+				if (!this._retainParent(coords.x, coords.y, coords.z, coords.z - 5)) {
+					this._retainChildren(coords.x, coords.y, coords.z, coords.z + 2);
+				}
+			}
+		}
+		for (key in this._tiles) {
+			if (!this._tiles[key].retain) {
+				this._removeTile(key);
+			}
+		}
+	},
+	_removeTilesAtZoom: function (zoom) {
+		for (var key in this._tiles) {
+			if (this._tiles[key].coords.z !== zoom) {
+				continue;
+			}
+			this._removeTile(key);
+		}
+	},
+	_removeAllTiles: function () {
+		for (var key in this._tiles) {
+			this._removeTile(key);
+		}
+	},
+	_invalidateAll: function () {
+		for (var z in this._levels) {
+			remove(this._levels[z].el);
+			this._onRemoveLevel(Number(z));
+			delete this._levels[z];
+		}
+		this._removeAllTiles();
+		this._tileZoom = undefined;
+	},
+	_retainParent: function (x, y, z, minZoom) {
+		var x2 = Math.floor(x / 2),
+		    y2 = Math.floor(y / 2),
+		    z2 = z - 1,
+		    coords2 = new Point(+x2, +y2);
+		coords2.z = +z2;
+		var key = this._tileCoordsToKey(coords2),
+		    tile = this._tiles[key];
+		if (tile && tile.active) {
+			tile.retain = true;
+			return true;
+		} else if (tile && tile.loaded) {
+			tile.retain = true;
+		}
+		if (z2 > minZoom) {
+			return this._retainParent(x2, y2, z2, minZoom);
+		}
+		return false;
+	},
+	_retainChildren: function (x, y, z, maxZoom) {
+		for (var i = 2 * x; i < 2 * x + 2; i++) {
+			for (var j = 2 * y; j < 2 * y + 2; j++) {
+				var coords = new Point(i, j);
+				coords.z = z + 1;
+				var key = this._tileCoordsToKey(coords),
+				    tile = this._tiles[key];
+				if (tile && tile.active) {
+					tile.retain = true;
+					continue;
+				} else if (tile && tile.loaded) {
+					tile.retain = true;
+				}
+				if (z + 1 < maxZoom) {
+					this._retainChildren(i, j, z + 1, maxZoom);
+				}
+			}
+		}
+	},
+	_resetView: function (e) {
+		var animating = e && (e.pinch || e.flyTo);
+		this._setView(this._map.getCenter(), this._map.getZoom(), animating, animating);
+	},
+	_animateZoom: function (e) {
+		this._setView(e.center, e.zoom, true, e.noUpdate);
+	},
+	_clampZoom: function (zoom) {
+		var options = this.options;
+		if (undefined !== options.minNativeZoom && zoom < options.minNativeZoom) {
+			return options.minNativeZoom;
+		}
+		if (undefined !== options.maxNativeZoom && options.maxNativeZoom < zoom) {
+			return options.maxNativeZoom;
+		}
+		return zoom;
+	},
+	_setView: function (center, zoom, noPrune, noUpdate) {
+		var tileZoom = Math.round(zoom);
+		if ((this.options.maxZoom !== undefined && tileZoom > this.options.maxZoom) ||
+		    (this.options.minZoom !== undefined && tileZoom < this.options.minZoom)) {
+			tileZoom = undefined;
+		} else {
+			tileZoom = this._clampZoom(tileZoom);
+		}
+		var tileZoomChanged = this.options.updateWhenZooming && (tileZoom !== this._tileZoom);
+		if (!noUpdate || tileZoomChanged) {
+			this._tileZoom = tileZoom;
+			if (this._abortLoading) {
+				this._abortLoading();
+			}
+			this._updateLevels();
+			this._resetGrid();
+			if (tileZoom !== undefined) {
+				this._update(center);
+			}
+			if (!noPrune) {
+				this._pruneTiles();
+			}
+			this._noPrune = !!noPrune;
+		}
+		this._setZoomTransforms(center, zoom);
+	},
+	_setZoomTransforms: function (center, zoom) {
+		for (var i in this._levels) {
+			this._setZoomTransform(this._levels[i], center, zoom);
+		}
+	},
+	_setZoomTransform: function (level, center, zoom) {
+		var scale = this._map.getZoomScale(zoom, level.zoom),
+		    translate = level.origin.multiplyBy(scale)
+		        .subtract(this._map._getNewPixelOrigin(center, zoom)).round();
+		if (Browser.any3d) {
+			setTransform(level.el, translate, scale);
+		} else {
+			setPosition(level.el, translate);
+		}
+	},
+	_resetGrid: function () {
+		var map = this._map,
+		    crs = map.options.crs,
+		    tileSize = this._tileSize = this.getTileSize(),
+		    tileZoom = this._tileZoom;
+		var bounds = this._map.getPixelWorldBounds(this._tileZoom);
+		if (bounds) {
+			this._globalTileRange = this._pxBoundsToTileRange(bounds);
+		}
+		this._wrapX = crs.wrapLng && !this.options.noWrap && [
+			Math.floor(map.project([0, crs.wrapLng[0]], tileZoom).x / tileSize.x),
+			Math.ceil(map.project([0, crs.wrapLng[1]], tileZoom).x / tileSize.y)
+		];
+		this._wrapY = crs.wrapLat && !this.options.noWrap && [
+			Math.floor(map.project([crs.wrapLat[0], 0], tileZoom).y / tileSize.x),
+			Math.ceil(map.project([crs.wrapLat[1], 0], tileZoom).y / tileSize.y)
+		];
+	},
+	_onMoveEnd: function () {
+		if (!this._map || this._map._animatingZoom) { return; }
+		this._update();
+	},
+	_getTiledPixelBounds: function (center) {
+		var map = this._map,
+		    mapZoom = map._animatingZoom ? Math.max(map._animateToZoom, map.getZoom()) : map.getZoom(),
+		    scale = map.getZoomScale(mapZoom, this._tileZoom),
+		    pixelCenter = map.project(center, this._tileZoom).floor(),
+		    halfSize = map.getSize().divideBy(scale * 2);
+		return new Bounds(pixelCenter.subtract(halfSize), pixelCenter.add(halfSize));
+	},
+	_update: function (center) {
+		var map = this._map;
+		if (!map) { return; }
+		var zoom = this._clampZoom(map.getZoom());
+		if (center === undefined) { center = map.getCenter(); }
+		if (this._tileZoom === undefined) { return; }
+		var pixelBounds = this._getTiledPixelBounds(center),
+		    tileRange = this._pxBoundsToTileRange(pixelBounds),
+		    tileCenter = tileRange.getCenter(),
+		    queue = [],
+		    margin = this.options.keepBuffer,
+		    noPruneRange = new Bounds(tileRange.getBottomLeft().subtract([margin, -margin]),
+		                              tileRange.getTopRight().add([margin, -margin]));
+		if (!(isFinite(tileRange.min.x) &&
+		      isFinite(tileRange.min.y) &&
+		      isFinite(tileRange.max.x) &&
+		      isFinite(tileRange.max.y))) { throw new Error('Attempted to load an infinite number of tiles'); }
+		for (var key in this._tiles) {
+			var c = this._tiles[key].coords;
+			if (c.z !== this._tileZoom || !noPruneRange.contains(new Point(c.x, c.y))) {
+				this._tiles[key].current = false;
+			}
+		}
+		if (Math.abs(zoom - this._tileZoom) > 1) { this._setView(center, zoom); return; }
+		for (var j = tileRange.min.y; j <= tileRange.max.y; j++) {
+			for (var i = tileRange.min.x; i <= tileRange.max.x; i++) {
+				var coords = new Point(i, j);
+				coords.z = this._tileZoom;
+				if (!this._isValidTile(coords)) { continue; }
+				var tile = this._tiles[this._tileCoordsToKey(coords)];
+				if (tile) {
+					tile.current = true;
+				} else {
+					queue.push(coords);
+				}
+			}
+		}
+		queue.sort(function (a, b) {
+			return a.distanceTo(tileCenter) - b.distanceTo(tileCenter);
+		});
+		if (queue.length !== 0) {
+			if (!this._loading) {
+				this._loading = true;
+				this.fire('loading');
+			}
+			var fragment = document.createDocumentFragment();
+			for (i = 0; i < queue.length; i++) {
+				this._addTile(queue[i], fragment);
+			}
+			this._level.el.appendChild(fragment);
+		}
+	},
+	_isValidTile: function (coords) {
+		var crs = this._map.options.crs;
+		if (!crs.infinite) {
+			var bounds = this._globalTileRange;
+			if ((!crs.wrapLng && (coords.x < bounds.min.x || coords.x > bounds.max.x)) ||
+			    (!crs.wrapLat && (coords.y < bounds.min.y || coords.y > bounds.max.y))) { return false; }
+		}
+		if (!this.options.bounds) { return true; }
+		var tileBounds = this._tileCoordsToBounds(coords);
+		return toLatLngBounds(this.options.bounds).overlaps(tileBounds);
+	},
+	_keyToBounds: function (key) {
+		return this._tileCoordsToBounds(this._keyToTileCoords(key));
+	},
+	_tileCoordsToNwSe: function (coords) {
+		var map = this._map,
+		    tileSize = this.getTileSize(),
+		    nwPoint = coords.scaleBy(tileSize),
+		    sePoint = nwPoint.add(tileSize),
+		    nw = map.unproject(nwPoint, coords.z),
+		    se = map.unproject(sePoint, coords.z);
+		return [nw, se];
+	},
+	_tileCoordsToBounds: function (coords) {
+		var bp = this._tileCoordsToNwSe(coords),
+		    bounds = new LatLngBounds(bp[0], bp[1]);
+		if (!this.options.noWrap) {
+			bounds = this._map.wrapLatLngBounds(bounds);
+		}
+		return bounds;
+	},
+	_tileCoordsToKey: function (coords) {
+		return coords.x + ':' + coords.y + ':' + coords.z;
+	},
+	_keyToTileCoords: function (key) {
+		var k = key.split(':'),
+		    coords = new Point(+k[0], +k[1]);
+		coords.z = +k[2];
+		return coords;
+	},
+	_removeTile: function (key) {
+		var tile = this._tiles[key];
+		if (!tile) { return; }
+		remove(tile.el);
+		delete this._tiles[key];
+		this.fire('tileunload', {
+			tile: tile.el,
+			coords: this._keyToTileCoords(key)
+		});
+	},
+	_initTile: function (tile) {
+		addClass(tile, 'leaflet-tile');
+		var tileSize = this.getTileSize();
+		tile.style.width = tileSize.x + 'px';
+		tile.style.height = tileSize.y + 'px';
+		tile.onselectstart = falseFn;
+		tile.onmousemove = falseFn;
+		if (Browser.ielt9 && this.options.opacity < 1) {
+			setOpacity(tile, this.options.opacity);
+		}
+	},
+	_addTile: function (coords, container) {
+		var tilePos = this._getTilePos(coords),
+		    key = this._tileCoordsToKey(coords);
+		var tile = this.createTile(this._wrapCoords(coords), bind(this._tileReady, this, coords));
+		this._initTile(tile);
+		if (this.createTile.length < 2) {
+			requestAnimFrame(bind(this._tileReady, this, coords, null, tile));
+		}
+		setPosition(tile, tilePos);
+		this._tiles[key] = {
+			el: tile,
+			coords: coords,
+			current: true
+		};
+		container.appendChild(tile);
+		this.fire('tileloadstart', {
+			tile: tile,
+			coords: coords
+		});
+	},
+	_tileReady: function (coords, err, tile) {
+		if (err) {
+			this.fire('tileerror', {
+				error: err,
+				tile: tile,
+				coords: coords
+			});
+		}
+		var key = this._tileCoordsToKey(coords);
+		tile = this._tiles[key];
+		if (!tile) { return; }
+		tile.loaded = +new Date();
+		if (this._map._fadeAnimated) {
+			setOpacity(tile.el, 0);
+			cancelAnimFrame(this._fadeFrame);
+			this._fadeFrame = requestAnimFrame(this._updateOpacity, this);
+		} else {
+			tile.active = true;
+			this._pruneTiles();
+		}
+		if (!err) {
+			addClass(tile.el, 'leaflet-tile-loaded');
+			this.fire('tileload', {
+				tile: tile.el,
+				coords: coords
+			});
+		}
+		if (this._noTilesToLoad()) {
+			this._loading = false;
+			this.fire('load');
+			if (Browser.ielt9 || !this._map._fadeAnimated) {
+				requestAnimFrame(this._pruneTiles, this);
+			} else {
+				setTimeout(bind(this._pruneTiles, this), 250);
+			}
+		}
+	},
+	_getTilePos: function (coords) {
+		return coords.scaleBy(this.getTileSize()).subtract(this._level.origin);
+	},
+	_wrapCoords: function (coords) {
+		var newCoords = new Point(
+			this._wrapX ? wrapNum(coords.x, this._wrapX) : coords.x,
+			this._wrapY ? wrapNum(coords.y, this._wrapY) : coords.y);
+		newCoords.z = coords.z;
+		return newCoords;
+	},
+	_pxBoundsToTileRange: function (bounds) {
+		var tileSize = this.getTileSize();
+		return new Bounds(
+			bounds.min.unscaleBy(tileSize).floor(),
+			bounds.max.unscaleBy(tileSize).ceil().subtract([1, 1]));
+	},
+	_noTilesToLoad: function () {
+		for (var key in this._tiles) {
+			if (!this._tiles[key].loaded) { return false; }
+		}
+		return true;
+	}
+  });
+  function gridLayer(options) {
+	return new GridLayer(options);
+  }
+  var TileLayer = GridLayer.extend({
+	options: {
+		minZoom: 0,
+		maxZoom: 18,
+		subdomains: 'abc',
+		errorTileUrl: '',
+		zoomOffset: 0,
+		tms: false,
+		zoomReverse: false,
+		detectRetina: false,
+		crossOrigin: false,
+		referrerPolicy: false
+	},
+	initialize: function (url, options) {
+		this._url = url;
+		options = setOptions(this, options);
+		if (options.detectRetina && Browser.retina && options.maxZoom > 0) {
+			options.tileSize = Math.floor(options.tileSize / 2);
+			if (!options.zoomReverse) {
+				options.zoomOffset++;
+				options.maxZoom = Math.max(options.minZoom, options.maxZoom - 1);
+			} else {
+				options.zoomOffset--;
+				options.minZoom = Math.min(options.maxZoom, options.minZoom + 1);
+			}
+			options.minZoom = Math.max(0, options.minZoom);
+		} else if (!options.zoomReverse) {
+			options.maxZoom = Math.max(options.minZoom, options.maxZoom);
+		} else {
+			options.minZoom = Math.min(options.maxZoom, options.minZoom);
+		}
+		if (typeof options.subdomains === 'string') {
+			options.subdomains = options.subdomains.split('');
+		}
+		this.on('tileunload', this._onTileRemove);
+	},
+	setUrl: function (url, noRedraw) {
+		if (this._url === url && noRedraw === undefined) {
+			noRedraw = true;
+		}
+		this._url = url;
+		if (!noRedraw) {
+			this.redraw();
+		}
+		return this;
+	},
+	createTile: function (coords, done) {
+		var tile = document.createElement('img');
+		on(tile, 'load', bind(this._tileOnLoad, this, done, tile));
+		on(tile, 'error', bind(this._tileOnError, this, done, tile));
+		if (this.options.crossOrigin || this.options.crossOrigin === '') {
+			tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
+		}
+		if (typeof this.options.referrerPolicy === 'string') {
+			tile.referrerPolicy = this.options.referrerPolicy;
+		}
+		tile.alt = '';
+		tile.src = this.getTileUrl(coords);
+		return tile;
+	},
+	getTileUrl: function (coords) {
+		var data = {
+			r: Browser.retina ? '@2x' : '',
+			s: this._getSubdomain(coords),
+			x: coords.x,
+			y: coords.y,
+			z: this._getZoomForUrl()
+		};
+		if (this._map && !this._map.options.crs.infinite) {
+			var invertedY = this._globalTileRange.max.y - coords.y;
+			if (this.options.tms) {
+				data['y'] = invertedY;
+			}
+			data['-y'] = invertedY;
+		}
+		return template(this._url, extend(data, this.options));
+	},
+	_tileOnLoad: function (done, tile) {
+		if (Browser.ielt9) {
+			setTimeout(bind(done, this, null, tile), 0);
+		} else {
+			done(null, tile);
+		}
+	},
+	_tileOnError: function (done, tile, e) {
+		var errorUrl = this.options.errorTileUrl;
+		if (errorUrl && tile.getAttribute('src') !== errorUrl) {
+			tile.src = errorUrl;
+		}
+		done(e, tile);
+	},
+	_onTileRemove: function (e) {
+		e.tile.onload = null;
+	},
+	_getZoomForUrl: function () {
+		var zoom = this._tileZoom,
+		maxZoom = this.options.maxZoom,
+		zoomReverse = this.options.zoomReverse,
+		zoomOffset = this.options.zoomOffset;
+		if (zoomReverse) {
+			zoom = maxZoom - zoom;
+		}
+		return zoom + zoomOffset;
+	},
+	_getSubdomain: function (tilePoint) {
+		var index = Math.abs(tilePoint.x + tilePoint.y) % this.options.subdomains.length;
+		return this.options.subdomains[index];
+	},
+	_abortLoading: function () {
+		var i, tile;
+		for (i in this._tiles) {
+			if (this._tiles[i].coords.z !== this._tileZoom) {
+				tile = this._tiles[i].el;
+				tile.onload = falseFn;
+				tile.onerror = falseFn;
+				if (!tile.complete) {
+					tile.src = emptyImageUrl;
+					var coords = this._tiles[i].coords;
+					remove(tile);
+					delete this._tiles[i];
+					this.fire('tileabort', {
+						tile: tile,
+						coords: coords
+					});
+				}
+			}
+		}
+	},
+	_removeTile: function (key) {
+		var tile = this._tiles[key];
+		if (!tile) { return; }
+		tile.el.setAttribute('src', emptyImageUrl);
+		return GridLayer.prototype._removeTile.call(this, key);
+	},
+	_tileReady: function (coords, err, tile) {
+		if (!this._map || (tile && tile.getAttribute('src') === emptyImageUrl)) {
+			return;
+		}
+		return GridLayer.prototype._tileReady.call(this, coords, err, tile);
+	}
+  });
+  function tileLayer(url, options) {
+	return new TileLayer(url, options);
+  }
+  var TileLayerWMS = TileLayer.extend({
+	defaultWmsParams: {
+		service: 'WMS',
+		request: 'GetMap',
+		layers: '',
+		styles: '',
+		format: 'image/jpeg',
+		transparent: false,
+		version: '1.1.1'
+	},
+	options: {
+		crs: null,
+		uppercase: false
+	},
+	initialize: function (url, options) {
+		this._url = url;
+		var wmsParams = extend({}, this.defaultWmsParams);
+		for (var i in options) {
+			if (!(i in this.options)) {
+				wmsParams[i] = options[i];
+			}
+		}
+		options = setOptions(this, options);
+		var realRetina = options.detectRetina && Browser.retina ? 2 : 1;
+		var tileSize = this.getTileSize();
+		wmsParams.width = tileSize.x * realRetina;
+		wmsParams.height = tileSize.y * realRetina;
+		this.wmsParams = wmsParams;
+	},
+	onAdd: function (map) {
+		this._crs = this.options.crs || map.options.crs;
+		this._wmsVersion = parseFloat(this.wmsParams.version);
+		var projectionKey = this._wmsVersion >= 1.3 ? 'crs' : 'srs';
+		this.wmsParams[projectionKey] = this._crs.code;
+		TileLayer.prototype.onAdd.call(this, map);
+	},
+	getTileUrl: function (coords) {
+		var tileBounds = this._tileCoordsToNwSe(coords),
+		    crs = this._crs,
+		    bounds = toBounds(crs.project(tileBounds[0]), crs.project(tileBounds[1])),
+		    min = bounds.min,
+		    max = bounds.max,
+		    bbox = (this._wmsVersion >= 1.3 && this._crs === EPSG4326 ?
+		    [min.y, min.x, max.y, max.x] :
+		    [min.x, min.y, max.x, max.y]).join(','),
+		    url = TileLayer.prototype.getTileUrl.call(this, coords);
+		return url +
+			getParamString(this.wmsParams, url, this.options.uppercase) +
+			(this.options.uppercase ? '&BBOX=' : '&bbox=') + bbox;
+	},
+	setParams: function (params, noRedraw) {
+		extend(this.wmsParams, params);
+		if (!noRedraw) {
+			this.redraw();
+		}
+		return this;
+	}
+  });
+  function tileLayerWMS(url, options) {
+	return new TileLayerWMS(url, options);
+  }
+  TileLayer.WMS = TileLayerWMS;
+  tileLayer.wms = tileLayerWMS;
+  var Renderer = Layer.extend({
+	options: {
+		padding: 0.1
+	},
+	initialize: function (options) {
+		setOptions(this, options);
+		stamp(this);
+		this._layers = this._layers || {};
+	},
+	onAdd: function () {
+		if (!this._container) {
+			this._initContainer();
+			addClass(this._container, 'leaflet-zoom-animated');
+		}
+		this.getPane().appendChild(this._container);
+		this._update();
+		this.on('update', this._updatePaths, this);
+	},
+	onRemove: function () {
+		this.off('update', this._updatePaths, this);
+		this._destroyContainer();
+	},
+	getEvents: function () {
+		var events = {
+			viewreset: this._reset,
+			zoom: this._onZoom,
+			moveend: this._update,
+			zoomend: this._onZoomEnd
+		};
+		if (this._zoomAnimated) {
+			events.zoomanim = this._onAnimZoom;
+		}
+		return events;
+	},
+	_onAnimZoom: function (ev) {
+		this._updateTransform(ev.center, ev.zoom);
+	},
+	_onZoom: function () {
+		this._updateTransform(this._map.getCenter(), this._map.getZoom());
+	},
+	_updateTransform: function (center, zoom) {
+		var scale = this._map.getZoomScale(zoom, this._zoom),
+		    viewHalf = this._map.getSize().multiplyBy(0.5 + this.options.padding),
+		    currentCenterPoint = this._map.project(this._center, zoom),
+		    topLeftOffset = viewHalf.multiplyBy(-scale).add(currentCenterPoint)
+				  .subtract(this._map._getNewPixelOrigin(center, zoom));
+		if (Browser.any3d) {
+			setTransform(this._container, topLeftOffset, scale);
+		} else {
+			setPosition(this._container, topLeftOffset);
+		}
+	},
+	_reset: function () {
+		this._update();
+		this._updateTransform(this._center, this._zoom);
+		for (var id in this._layers) {
+			this._layers[id]._reset();
+		}
+	},
+	_onZoomEnd: function () {
+		for (var id in this._layers) {
+			this._layers[id]._project();
+		}
+	},
+	_updatePaths: function () {
+		for (var id in this._layers) {
+			this._layers[id]._update();
+		}
+	},
+	_update: function () {
+		var p = this.options.padding,
+		    size = this._map.getSize(),
+		    min = this._map.containerPointToLayerPoint(size.multiplyBy(-p)).round();
+		this._bounds = new Bounds(min, min.add(size.multiplyBy(1 + p * 2)).round());
+		this._center = this._map.getCenter();
+		this._zoom = this._map.getZoom();
+	}
+  });
+  var Canvas = Renderer.extend({
+	options: {
+		tolerance: 0
+	},
+	getEvents: function () {
+		var events = Renderer.prototype.getEvents.call(this);
+		events.viewprereset = this._onViewPreReset;
+		return events;
+	},
+	_onViewPreReset: function () {
+		this._postponeUpdatePaths = true;
+	},
+	onAdd: function () {
+		Renderer.prototype.onAdd.call(this);
+		this._draw();
+	},
+	_initContainer: function () {
+		var container = this._container = document.createElement('canvas');
+		on(container, 'mousemove', this._onMouseMove, this);
+		on(container, 'click dblclick mousedown mouseup contextmenu', this._onClick, this);
+		on(container, 'mouseout', this._handleMouseOut, this);
+		container['_leaflet_disable_events'] = true;
+		this._ctx = container.getContext('2d');
+	},
+	_destroyContainer: function () {
+		cancelAnimFrame(this._redrawRequest);
+		delete this._ctx;
+		remove(this._container);
+		off(this._container);
+		delete this._container;
+	},
+	_updatePaths: function () {
+		if (this._postponeUpdatePaths) { return; }
+		var layer;
+		this._redrawBounds = null;
+		for (var id in this._layers) {
+			layer = this._layers[id];
+			layer._update();
+		}
+		this._redraw();
+	},
+	_update: function () {
+		if (this._map._animatingZoom && this._bounds) { return; }
+		Renderer.prototype._update.call(this);
+		var b = this._bounds,
+		    container = this._container,
+		    size = b.getSize(),
+		    m = Browser.retina ? 2 : 1;
+		setPosition(container, b.min);
+		container.width = m * size.x;
+		container.height = m * size.y;
+		container.style.width = size.x + 'px';
+		container.style.height = size.y + 'px';
+		if (Browser.retina) {
+			this._ctx.scale(2, 2);
+		}
+		this._ctx.translate(-b.min.x, -b.min.y);
+		this.fire('update');
+	},
+	_reset: function () {
+		Renderer.prototype._reset.call(this);
+		if (this._postponeUpdatePaths) {
+			this._postponeUpdatePaths = false;
+			this._updatePaths();
+		}
+	},
+	_initPath: function (layer) {
+		this._updateDashArray(layer);
+		this._layers[stamp(layer)] = layer;
+		var order = layer._order = {
+			layer: layer,
+			prev: this._drawLast,
+			next: null
+		};
+		if (this._drawLast) { this._drawLast.next = order; }
+		this._drawLast = order;
+		this._drawFirst = this._drawFirst || this._drawLast;
+	},
+	_addPath: function (layer) {
+		this._requestRedraw(layer);
+	},
+	_removePath: function (layer) {
+		var order = layer._order;
+		var next = order.next;
+		var prev = order.prev;
+		if (next) {
+			next.prev = prev;
+		} else {
+			this._drawLast = prev;
+		}
+		if (prev) {
+			prev.next = next;
+		} else {
+			this._drawFirst = next;
+		}
+		delete layer._order;
+		delete this._layers[stamp(layer)];
+		this._requestRedraw(layer);
+	},
+	_updatePath: function (layer) {
+		this._extendRedrawBounds(layer);
+		layer._project();
+		layer._update();
+		this._requestRedraw(layer);
+	},
+	_updateStyle: function (layer) {
+		this._updateDashArray(layer);
+		this._requestRedraw(layer);
+	},
+	_updateDashArray: function (layer) {
+		if (typeof layer.options.dashArray === 'string') {
+			var parts = layer.options.dashArray.split(/[, ]+/),
+			    dashArray = [],
+			    dashValue,
+			    i;
+			for (i = 0; i < parts.length; i++) {
+				dashValue = Number(parts[i]);
+				if (isNaN(dashValue)) { return; }
+				dashArray.push(dashValue);
+			}
+			layer.options._dashArray = dashArray;
+		} else {
+			layer.options._dashArray = layer.options.dashArray;
+		}
+	},
+	_requestRedraw: function (layer) {
+		if (!this._map) { return; }
+		this._extendRedrawBounds(layer);
+		this._redrawRequest = this._redrawRequest || requestAnimFrame(this._redraw, this);
+	},
+	_extendRedrawBounds: function (layer) {
+		if (layer._pxBounds) {
+			var padding = (layer.options.weight || 0) + 1;
+			this._redrawBounds = this._redrawBounds || new Bounds();
+			this._redrawBounds.extend(layer._pxBounds.min.subtract([padding, padding]));
+			this._redrawBounds.extend(layer._pxBounds.max.add([padding, padding]));
+		}
+	},
+	_redraw: function () {
+		this._redrawRequest = null;
+		if (this._redrawBounds) {
+			this._redrawBounds.min._floor();
+			this._redrawBounds.max._ceil();
+		}
+		this._clear();
+		this._draw();
+		this._redrawBounds = null;
+	},
+	_clear: function () {
+		var bounds = this._redrawBounds;
+		if (bounds) {
+			var size = bounds.getSize();
+			this._ctx.clearRect(bounds.min.x, bounds.min.y, size.x, size.y);
+		} else {
+			this._ctx.save();
+			this._ctx.setTransform(1, 0, 0, 1, 0, 0);
+			this._ctx.clearRect(0, 0, this._container.width, this._container.height);
+			this._ctx.restore();
+		}
+	},
+	_draw: function () {
+		var layer, bounds = this._redrawBounds;
+		this._ctx.save();
+		if (bounds) {
+			var size = bounds.getSize();
+			this._ctx.beginPath();
+			this._ctx.rect(bounds.min.x, bounds.min.y, size.x, size.y);
+			this._ctx.clip();
+		}
+		this._drawing = true;
+		for (var order = this._drawFirst; order; order = order.next) {
+			layer = order.layer;
+			if (!bounds || (layer._pxBounds && layer._pxBounds.intersects(bounds))) {
+				layer._updatePath();
+			}
+		}
+		this._drawing = false;
+		this._ctx.restore();
+	},
+	_updatePoly: function (layer, closed) {
+		if (!this._drawing) { return; }
+		var i, j, len2, p,
+		    parts = layer._parts,
+		    len = parts.length,
+		    ctx = this._ctx;
+		if (!len) { return; }
+		ctx.beginPath();
+		for (i = 0; i < len; i++) {
+			for (j = 0, len2 = parts[i].length; j < len2; j++) {
+				p = parts[i][j];
+				ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
+			}
+			if (closed) {
+				ctx.closePath();
+			}
+		}
+		this._fillStroke(ctx, layer);
+	},
+	_updateCircle: function (layer) {
+		if (!this._drawing || layer._empty()) { return; }
+		var p = layer._point,
+		    ctx = this._ctx,
+		    r = Math.max(Math.round(layer._radius), 1),
+		    s = (Math.max(Math.round(layer._radiusY), 1) || r) / r;
+		if (s !== 1) {
+			ctx.save();
+			ctx.scale(1, s);
+		}
+		ctx.beginPath();
+		ctx.arc(p.x, p.y / s, r, 0, Math.PI * 2, false);
+		if (s !== 1) {
+			ctx.restore();
+		}
+		this._fillStroke(ctx, layer);
+	},
+	_fillStroke: function (ctx, layer) {
+		var options = layer.options;
+		if (options.fill) {
+			ctx.globalAlpha = options.fillOpacity;
+			ctx.fillStyle = options.fillColor || options.color;
+			ctx.fill(options.fillRule || 'evenodd');
+		}
+		if (options.stroke && options.weight !== 0) {
+			if (ctx.setLineDash) {
+				ctx.setLineDash(layer.options && layer.options._dashArray || []);
+			}
+			ctx.globalAlpha = options.opacity;
+			ctx.lineWidth = options.weight;
+			ctx.strokeStyle = options.color;
+			ctx.lineCap = options.lineCap;
+			ctx.lineJoin = options.lineJoin;
+			ctx.stroke();
+		}
+	},
+	_onClick: function (e) {
+		var point = this._map.mouseEventToLayerPoint(e), layer, clickedLayer;
+		for (var order = this._drawFirst; order; order = order.next) {
+			layer = order.layer;
+			if (layer.options.interactive && layer._containsPoint(point)) {
+				if (!(e.type === 'click' || e.type === 'preclick') || !this._map._draggableMoved(layer)) {
+					clickedLayer = layer;
+				}
+			}
+		}
+		this._fireEvent(clickedLayer ? [clickedLayer] : false, e);
+	},
+	_onMouseMove: function (e) {
+		if (!this._map || this._map.dragging.moving() || this._map._animatingZoom) { return; }
+		var point = this._map.mouseEventToLayerPoint(e);
+		this._handleMouseHover(e, point);
+	},
+	_handleMouseOut: function (e) {
+		var layer = this._hoveredLayer;
+		if (layer) {
+			removeClass(this._container, 'leaflet-interactive');
+			this._fireEvent([layer], e, 'mouseout');
+			this._hoveredLayer = null;
+			this._mouseHoverThrottled = false;
+		}
+	},
+	_handleMouseHover: function (e, point) {
+		if (this._mouseHoverThrottled) {
+			return;
+		}
+		var layer, candidateHoveredLayer;
+		for (var order = this._drawFirst; order; order = order.next) {
+			layer = order.layer;
+			if (layer.options.interactive && layer._containsPoint(point)) {
+				candidateHoveredLayer = layer;
+			}
+		}
+		if (candidateHoveredLayer !== this._hoveredLayer) {
+			this._handleMouseOut(e);
+			if (candidateHoveredLayer) {
+				addClass(this._container, 'leaflet-interactive');
+				this._fireEvent([candidateHoveredLayer], e, 'mouseover');
+				this._hoveredLayer = candidateHoveredLayer;
+			}
+		}
+		this._fireEvent(this._hoveredLayer ? [this._hoveredLayer] : false, e);
+		this._mouseHoverThrottled = true;
+		setTimeout(bind(function () {
+			this._mouseHoverThrottled = false;
+		}, this), 32);
+	},
+	_fireEvent: function (layers, e, type) {
+		this._map._fireDOMEvent(e, type || e.type, layers);
+	},
+	_bringToFront: function (layer) {
+		var order = layer._order;
+		if (!order) { return; }
+		var next = order.next;
+		var prev = order.prev;
+		if (next) {
+			next.prev = prev;
+		} else {
+			return;
+		}
+		if (prev) {
+			prev.next = next;
+		} else if (next) {
+			this._drawFirst = next;
+		}
+		order.prev = this._drawLast;
+		this._drawLast.next = order;
+		order.next = null;
+		this._drawLast = order;
+		this._requestRedraw(layer);
+	},
+	_bringToBack: function (layer) {
+		var order = layer._order;
+		if (!order) { return; }
+		var next = order.next;
+		var prev = order.prev;
+		if (prev) {
+			prev.next = next;
+		} else {
+			return;
+		}
+		if (next) {
+			next.prev = prev;
+		} else if (prev) {
+			this._drawLast = prev;
+		}
+		order.prev = null;
+		order.next = this._drawFirst;
+		this._drawFirst.prev = order;
+		this._drawFirst = order;
+		this._requestRedraw(layer);
+	}
+  });
+  function canvas(options) {
+	return Browser.canvas ? new Canvas(options) : null;
+  }
+  var vmlCreate = (function () {
+	try {
+		document.namespaces.add('lvml', 'urn:schemas-microsoft-com:vml');
+		return function (name) {
+			return document.createElement('<lvml:' + name + ' class="lvml">');
+		};
+	} catch (e) {
+	}
+	return function (name) {
+		return document.createElement('<' + name + ' xmlns="urn:schemas-microsoft.com:vml" class="lvml">');
+	};
+  })();
+  var vmlMixin = {
+	_initContainer: function () {
+		this._container = create$1('div', 'leaflet-vml-container');
+	},
+	_update: function () {
+		if (this._map._animatingZoom) { return; }
+		Renderer.prototype._update.call(this);
+		this.fire('update');
+	},
+	_initPath: function (layer) {
+		var container = layer._container = vmlCreate('shape');
+		addClass(container, 'leaflet-vml-shape ' + (this.options.className || ''));
+		container.coordsize = '1 1';
+		layer._path = vmlCreate('path');
+		container.appendChild(layer._path);
+		this._updateStyle(layer);
+		this._layers[stamp(layer)] = layer;
+	},
+	_addPath: function (layer) {
+		var container = layer._container;
+		this._container.appendChild(container);
+		if (layer.options.interactive) {
+			layer.addInteractiveTarget(container);
+		}
+	},
+	_removePath: function (layer) {
+		var container = layer._container;
+		remove(container);
+		layer.removeInteractiveTarget(container);
+		delete this._layers[stamp(layer)];
+	},
+	_updateStyle: function (layer) {
+		var stroke = layer._stroke,
+		    fill = layer._fill,
+		    options = layer.options,
+		    container = layer._container;
+		container.stroked = !!options.stroke;
+		container.filled = !!options.fill;
+		if (options.stroke) {
+			if (!stroke) {
+				stroke = layer._stroke = vmlCreate('stroke');
+			}
+			container.appendChild(stroke);
+			stroke.weight = options.weight + 'px';
+			stroke.color = options.color;
+			stroke.opacity = options.opacity;
+			if (options.dashArray) {
+				stroke.dashStyle = isArray(options.dashArray) ?
+				    options.dashArray.join(' ') :
+				    options.dashArray.replace(/( *, *)/g, ' ');
+			} else {
+				stroke.dashStyle = '';
+			}
+			stroke.endcap = options.lineCap.replace('butt', 'flat');
+			stroke.joinstyle = options.lineJoin;
+		} else if (stroke) {
+			container.removeChild(stroke);
+			layer._stroke = null;
+		}
+		if (options.fill) {
+			if (!fill) {
+				fill = layer._fill = vmlCreate('fill');
+			}
+			container.appendChild(fill);
+			fill.color = options.fillColor || options.color;
+			fill.opacity = options.fillOpacity;
+		} else if (fill) {
+			container.removeChild(fill);
+			layer._fill = null;
+		}
+	},
+	_updateCircle: function (layer) {
+		var p = layer._point.round(),
+		    r = Math.round(layer._radius),
+		    r2 = Math.round(layer._radiusY || r);
+		this._setPath(layer, layer._empty() ? 'M0 0' :
+			'AL ' + p.x + ',' + p.y + ' ' + r + ',' + r2 + ' 0,' + (65535 * 360));
+	},
+	_setPath: function (layer, path) {
+		layer._path.v = path;
+	},
+	_bringToFront: function (layer) {
+		toFront(layer._container);
+	},
+	_bringToBack: function (layer) {
+		toBack(layer._container);
+	}
+  };
+  var create = Browser.vml ? vmlCreate : svgCreate;
+  var SVG = Renderer.extend({
+	_initContainer: function () {
+		this._container = create('svg');
+		this._container.setAttribute('pointer-events', 'none');
+		this._rootGroup = create('g');
+		this._container.appendChild(this._rootGroup);
+	},
+	_destroyContainer: function () {
+		remove(this._container);
+		off(this._container);
+		delete this._container;
+		delete this._rootGroup;
+		delete this._svgSize;
+	},
+	_update: function () {
+		if (this._map._animatingZoom && this._bounds) { return; }
+		Renderer.prototype._update.call(this);
+		var b = this._bounds,
+		    size = b.getSize(),
+		    container = this._container;
+		if (!this._svgSize || !this._svgSize.equals(size)) {
+			this._svgSize = size;
+			container.setAttribute('width', size.x);
+			container.setAttribute('height', size.y);
+		}
+		setPosition(container, b.min);
+		container.setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
+		this.fire('update');
+	},
+	_initPath: function (layer) {
+		var path = layer._path = create('path');
+		if (layer.options.className) {
+			addClass(path, layer.options.className);
+		}
+		if (layer.options.interactive) {
+			addClass(path, 'leaflet-interactive');
+		}
+		this._updateStyle(layer);
+		this._layers[stamp(layer)] = layer;
+	},
+	_addPath: function (layer) {
+		if (!this._rootGroup) { this._initContainer(); }
+		this._rootGroup.appendChild(layer._path);
+		layer.addInteractiveTarget(layer._path);
+	},
+	_removePath: function (layer) {
+		remove(layer._path);
+		layer.removeInteractiveTarget(layer._path);
+		delete this._layers[stamp(layer)];
+	},
+	_updatePath: function (layer) {
+		layer._project();
+		layer._update();
+	},
+	_updateStyle: function (layer) {
+		var path = layer._path,
+		    options = layer.options;
+		if (!path) { return; }
+		if (options.stroke) {
+			path.setAttribute('stroke', options.color);
+			path.setAttribute('stroke-opacity', options.opacity);
+			path.setAttribute('stroke-width', options.weight);
+			path.setAttribute('stroke-linecap', options.lineCap);
+			path.setAttribute('stroke-linejoin', options.lineJoin);
+			if (options.dashArray) {
+				path.setAttribute('stroke-dasharray', options.dashArray);
+			} else {
+				path.removeAttribute('stroke-dasharray');
+			}
+			if (options.dashOffset) {
+				path.setAttribute('stroke-dashoffset', options.dashOffset);
+			} else {
+				path.removeAttribute('stroke-dashoffset');
+			}
+		} else {
+			path.setAttribute('stroke', 'none');
+		}
+		if (options.fill) {
+			path.setAttribute('fill', options.fillColor || options.color);
+			path.setAttribute('fill-opacity', options.fillOpacity);
+			path.setAttribute('fill-rule', options.fillRule || 'evenodd');
+		} else {
+			path.setAttribute('fill', 'none');
+		}
+	},
+	_updatePoly: function (layer, closed) {
+		this._setPath(layer, pointsToPath(layer._parts, closed));
+	},
+	_updateCircle: function (layer) {
+		var p = layer._point,
+		    r = Math.max(Math.round(layer._radius), 1),
+		    r2 = Math.max(Math.round(layer._radiusY), 1) || r,
+		    arc = 'a' + r + ',' + r2 + ' 0 1,0 ';
+		var d = layer._empty() ? 'M0 0' :
+			'M' + (p.x - r) + ',' + p.y +
+			arc + (r * 2) + ',0 ' +
+			arc + (-r * 2) + ',0 ';
+		this._setPath(layer, d);
+	},
+	_setPath: function (layer, path) {
+		layer._path.setAttribute('d', path);
+	},
+	_bringToFront: function (layer) {
+		toFront(layer._path);
+	},
+	_bringToBack: function (layer) {
+		toBack(layer._path);
+	}
+  });
+  if (Browser.vml) {
+	SVG.include(vmlMixin);
+  }
+  function svg(options) {
+	return Browser.svg || Browser.vml ? new SVG(options) : null;
+  }
+  Map.include({
+	getRenderer: function (layer) {
+		var renderer = layer.options.renderer || this._getPaneRenderer(layer.options.pane) || this.options.renderer || this._renderer;
+		if (!renderer) {
+			renderer = this._renderer = this._createRenderer();
+		}
+		if (!this.hasLayer(renderer)) {
+			this.addLayer(renderer);
+		}
+		return renderer;
+	},
+	_getPaneRenderer: function (name) {
+		if (name === 'overlayPane' || name === undefined) {
+			return false;
+		}
+		var renderer = this._paneRenderers[name];
+		if (renderer === undefined) {
+			renderer = this._createRenderer({pane: name});
+			this._paneRenderers[name] = renderer;
+		}
+		return renderer;
+	},
+	_createRenderer: function (options) {
+		return (this.options.preferCanvas && canvas(options)) || svg(options);
+	}
+  });
+  var Rectangle = Polygon.extend({
+	initialize: function (latLngBounds, options) {
+		Polygon.prototype.initialize.call(this, this._boundsToLatLngs(latLngBounds), options);
+	},
+	setBounds: function (latLngBounds) {
+		return this.setLatLngs(this._boundsToLatLngs(latLngBounds));
+	},
+	_boundsToLatLngs: function (latLngBounds) {
+		latLngBounds = toLatLngBounds(latLngBounds);
+		return [
+			latLngBounds.getSouthWest(),
+			latLngBounds.getNorthWest(),
+			latLngBounds.getNorthEast(),
+			latLngBounds.getSouthEast()
+		];
+	}
+  });
+  function rectangle(latLngBounds, options) {
+	return new Rectangle(latLngBounds, options);
+  }
+  SVG.create = create;
+  SVG.pointsToPath = pointsToPath;
+  GeoJSON.geometryToLayer = geometryToLayer;
+  GeoJSON.coordsToLatLng = coordsToLatLng;
+  GeoJSON.coordsToLatLngs = coordsToLatLngs;
+  GeoJSON.latLngToCoords = latLngToCoords;
+  GeoJSON.latLngsToCoords = latLngsToCoords;
+  GeoJSON.getFeature = getFeature;
+  GeoJSON.asFeature = asFeature;
+  Map.mergeOptions({
+	boxZoom: true
+  });
+  var BoxZoom = Handler.extend({
+	initialize: function (map) {
+		this._map = map;
+		this._container = map._container;
+		this._pane = map._panes.overlayPane;
+		this._resetStateTimeout = 0;
+		map.on('unload', this._destroy, this);
+	},
+	addHooks: function () {
+		on(this._container, 'mousedown', this._onMouseDown, this);
+	},
+	removeHooks: function () {
+		off(this._container, 'mousedown', this._onMouseDown, this);
+	},
+	moved: function () {
+		return this._moved;
+	},
+	_destroy: function () {
+		remove(this._pane);
+		delete this._pane;
+	},
+	_resetState: function () {
+		this._resetStateTimeout = 0;
+		this._moved = false;
+	},
+	_clearDeferredResetState: function () {
+		if (this._resetStateTimeout !== 0) {
+			clearTimeout(this._resetStateTimeout);
+			this._resetStateTimeout = 0;
+		}
+	},
+	_onMouseDown: function (e) {
+		if (!e.shiftKey || ((e.which !== 1) && (e.button !== 1))) { return false; }
+		this._clearDeferredResetState();
+		this._resetState();
+		disableTextSelection();
+		disableImageDrag();
+		this._startPoint = this._map.mouseEventToContainerPoint(e);
+		on(document, {
+			contextmenu: stop,
+			mousemove: this._onMouseMove,
+			mouseup: this._onMouseUp,
+			keydown: this._onKeyDown
+		}, this);
+	},
+	_onMouseMove: function (e) {
+		if (!this._moved) {
+			this._moved = true;
+			this._box = create$1('div', 'leaflet-zoom-box', this._container);
+			addClass(this._container, 'leaflet-crosshair');
+			this._map.fire('boxzoomstart');
+		}
+		this._point = this._map.mouseEventToContainerPoint(e);
+		var bounds = new Bounds(this._point, this._startPoint),
+		    size = bounds.getSize();
+		setPosition(this._box, bounds.min);
+		this._box.style.width  = size.x + 'px';
+		this._box.style.height = size.y + 'px';
+	},
+	_finish: function () {
+		if (this._moved) {
+			remove(this._box);
+			removeClass(this._container, 'leaflet-crosshair');
+		}
+		enableTextSelection();
+		enableImageDrag();
+		off(document, {
+			contextmenu: stop,
+			mousemove: this._onMouseMove,
+			mouseup: this._onMouseUp,
+			keydown: this._onKeyDown
+		}, this);
+	},
+	_onMouseUp: function (e) {
+		if ((e.which !== 1) && (e.button !== 1)) { return; }
+		this._finish();
+		if (!this._moved) { return; }
+		this._clearDeferredResetState();
+		this._resetStateTimeout = setTimeout(bind(this._resetState, this), 0);
+		var bounds = new LatLngBounds(
+		        this._map.containerPointToLatLng(this._startPoint),
+		        this._map.containerPointToLatLng(this._point));
+		this._map
+			.fitBounds(bounds)
+			.fire('boxzoomend', {boxZoomBounds: bounds});
+	},
+	_onKeyDown: function (e) {
+		if (e.keyCode === 27) {
+			this._finish();
+			this._clearDeferredResetState();
+			this._resetState();
+		}
+	}
+  });
+  Map.addInitHook('addHandler', 'boxZoom', BoxZoom);
+  Map.mergeOptions({
+	doubleClickZoom: true
+  });
+  var DoubleClickZoom = Handler.extend({
+	addHooks: function () {
+		this._map.on('dblclick', this._onDoubleClick, this);
+	},
+	removeHooks: function () {
+		this._map.off('dblclick', this._onDoubleClick, this);
+	},
+	_onDoubleClick: function (e) {
+		var map = this._map,
+		    oldZoom = map.getZoom(),
+		    delta = map.options.zoomDelta,
+		    zoom = e.originalEvent.shiftKey ? oldZoom - delta : oldZoom + delta;
+		if (map.options.doubleClickZoom === 'center') {
+			map.setZoom(zoom);
+		} else {
+			map.setZoomAround(e.containerPoint, zoom);
+		}
+	}
+  });
+  Map.addInitHook('addHandler', 'doubleClickZoom', DoubleClickZoom);
+  Map.mergeOptions({
+	dragging: true,
+	inertia: true,
+	inertiaDeceleration: 3400,
+	inertiaMaxSpeed: Infinity,
+	easeLinearity: 0.2,
+	worldCopyJump: false,
+	maxBoundsViscosity: 0.0
+  });
+  var Drag = Handler.extend({
+	addHooks: function () {
+		if (!this._draggable) {
+			var map = this._map;
+			this._draggable = new Draggable(map._mapPane, map._container);
+			this._draggable.on({
+				dragstart: this._onDragStart,
+				drag: this._onDrag,
+				dragend: this._onDragEnd
+			}, this);
+			this._draggable.on('predrag', this._onPreDragLimit, this);
+			if (map.options.worldCopyJump) {
+				this._draggable.on('predrag', this._onPreDragWrap, this);
+				map.on('zoomend', this._onZoomEnd, this);
+				map.whenReady(this._onZoomEnd, this);
+			}
+		}
+		addClass(this._map._container, 'leaflet-grab leaflet-touch-drag');
+		this._draggable.enable();
+		this._positions = [];
+		this._times = [];
+	},
+	removeHooks: function () {
+		removeClass(this._map._container, 'leaflet-grab');
+		removeClass(this._map._container, 'leaflet-touch-drag');
+		this._draggable.disable();
+	},
+	moved: function () {
+		return this._draggable && this._draggable._moved;
+	},
+	moving: function () {
+		return this._draggable && this._draggable._moving;
+	},
+	_onDragStart: function () {
+		var map = this._map;
+		map._stop();
+		if (this._map.options.maxBounds && this._map.options.maxBoundsViscosity) {
+			var bounds = toLatLngBounds(this._map.options.maxBounds);
+			this._offsetLimit = toBounds(
+				this._map.latLngToContainerPoint(bounds.getNorthWest()).multiplyBy(-1),
+				this._map.latLngToContainerPoint(bounds.getSouthEast()).multiplyBy(-1)
+					.add(this._map.getSize()));
+			this._viscosity = Math.min(1.0, Math.max(0.0, this._map.options.maxBoundsViscosity));
+		} else {
+			this._offsetLimit = null;
+		}
+		map
+		    .fire('movestart')
+		    .fire('dragstart');
+		if (map.options.inertia) {
+			this._positions = [];
+			this._times = [];
+		}
+	},
+	_onDrag: function (e) {
+		if (this._map.options.inertia) {
+			var time = this._lastTime = +new Date(),
+			    pos = this._lastPos = this._draggable._absPos || this._draggable._newPos;
+			this._positions.push(pos);
+			this._times.push(time);
+			this._prunePositions(time);
+		}
+		this._map
+		    .fire('move', e)
+		    .fire('drag', e);
+	},
+	_prunePositions: function (time) {
+		while (this._positions.length > 1 && time - this._times[0] > 50) {
+			this._positions.shift();
+			this._times.shift();
+		}
+	},
+	_onZoomEnd: function () {
+		var pxCenter = this._map.getSize().divideBy(2),
+		    pxWorldCenter = this._map.latLngToLayerPoint([0, 0]);
+		this._initialWorldOffset = pxWorldCenter.subtract(pxCenter).x;
+		this._worldWidth = this._map.getPixelWorldBounds().getSize().x;
+	},
+	_viscousLimit: function (value, threshold) {
+		return value - (value - threshold) * this._viscosity;
+	},
+	_onPreDragLimit: function () {
+		if (!this._viscosity || !this._offsetLimit) { return; }
+		var offset = this._draggable._newPos.subtract(this._draggable._startPos);
+		var limit = this._offsetLimit;
+		if (offset.x < limit.min.x) { offset.x = this._viscousLimit(offset.x, limit.min.x); }
+		if (offset.y < limit.min.y) { offset.y = this._viscousLimit(offset.y, limit.min.y); }
+		if (offset.x > limit.max.x) { offset.x = this._viscousLimit(offset.x, limit.max.x); }
+		if (offset.y > limit.max.y) { offset.y = this._viscousLimit(offset.y, limit.max.y); }
+		this._draggable._newPos = this._draggable._startPos.add(offset);
+	},
+	_onPreDragWrap: function () {
+		var worldWidth = this._worldWidth,
+		    halfWidth = Math.round(worldWidth / 2),
+		    dx = this._initialWorldOffset,
+		    x = this._draggable._newPos.x,
+		    newX1 = (x - halfWidth + dx) % worldWidth + halfWidth - dx,
+		    newX2 = (x + halfWidth + dx) % worldWidth - halfWidth - dx,
+		    newX = Math.abs(newX1 + dx) < Math.abs(newX2 + dx) ? newX1 : newX2;
+		this._draggable._absPos = this._draggable._newPos.clone();
+		this._draggable._newPos.x = newX;
+	},
+	_onDragEnd: function (e) {
+		var map = this._map,
+		    options = map.options,
+		    noInertia = !options.inertia || e.noInertia || this._times.length < 2;
+		map.fire('dragend', e);
+		if (noInertia) {
+			map.fire('moveend');
+		} else {
+			this._prunePositions(+new Date());
+			var direction = this._lastPos.subtract(this._positions[0]),
+			    duration = (this._lastTime - this._times[0]) / 1000,
+			    ease = options.easeLinearity,
+			    speedVector = direction.multiplyBy(ease / duration),
+			    speed = speedVector.distanceTo([0, 0]),
+			    limitedSpeed = Math.min(options.inertiaMaxSpeed, speed),
+			    limitedSpeedVector = speedVector.multiplyBy(limitedSpeed / speed),
+			    decelerationDuration = limitedSpeed / (options.inertiaDeceleration * ease),
+			    offset = limitedSpeedVector.multiplyBy(-decelerationDuration / 2).round();
+			if (!offset.x && !offset.y) {
+				map.fire('moveend');
+			} else {
+				offset = map._limitOffset(offset, map.options.maxBounds);
+				requestAnimFrame(function () {
+					map.panBy(offset, {
+						duration: decelerationDuration,
+						easeLinearity: ease,
+						noMoveStart: true,
+						animate: true
+					});
+				});
+			}
+		}
+	}
+  });
+  Map.addInitHook('addHandler', 'dragging', Drag);
+  Map.mergeOptions({
+	keyboard: true,
+	keyboardPanDelta: 80
+  });
+  var Keyboard = Handler.extend({
+	keyCodes: {
+		left:    [37],
+		right:   [39],
+		down:    [40],
+		up:      [38],
+		zoomIn:  [187, 107, 61, 171],
+		zoomOut: [189, 109, 54, 173]
+	},
+	initialize: function (map) {
+		this._map = map;
+		this._setPanDelta(map.options.keyboardPanDelta);
+		this._setZoomDelta(map.options.zoomDelta);
+	},
+	addHooks: function () {
+		var container = this._map._container;
+		if (container.tabIndex <= 0) {
+			container.tabIndex = '0';
+		}
+		on(container, {
+			focus: this._onFocus,
+			blur: this._onBlur,
+			mousedown: this._onMouseDown
+		}, this);
+		this._map.on({
+			focus: this._addHooks,
+			blur: this._removeHooks
+		}, this);
+	},
+	removeHooks: function () {
+		this._removeHooks();
+		off(this._map._container, {
+			focus: this._onFocus,
+			blur: this._onBlur,
+			mousedown: this._onMouseDown
+		}, this);
+		this._map.off({
+			focus: this._addHooks,
+			blur: this._removeHooks
+		}, this);
+	},
+	_onMouseDown: function () {
+		if (this._focused) { return; }
+		var body = document.body,
+		    docEl = document.documentElement,
+		    top = body.scrollTop || docEl.scrollTop,
+		    left = body.scrollLeft || docEl.scrollLeft;
+		this._map._container.focus();
+		window.scrollTo(left, top);
+	},
+	_onFocus: function () {
+		this._focused = true;
+		this._map.fire('focus');
+	},
+	_onBlur: function () {
+		this._focused = false;
+		this._map.fire('blur');
+	},
+	_setPanDelta: function (panDelta) {
+		var keys = this._panKeys = {},
+		    codes = this.keyCodes,
+		    i, len;
+		for (i = 0, len = codes.left.length; i < len; i++) {
+			keys[codes.left[i]] = [-1 * panDelta, 0];
+		}
+		for (i = 0, len = codes.right.length; i < len; i++) {
+			keys[codes.right[i]] = [panDelta, 0];
+		}
+		for (i = 0, len = codes.down.length; i < len; i++) {
+			keys[codes.down[i]] = [0, panDelta];
+		}
+		for (i = 0, len = codes.up.length; i < len; i++) {
+			keys[codes.up[i]] = [0, -1 * panDelta];
+		}
+	},
+	_setZoomDelta: function (zoomDelta) {
+		var keys = this._zoomKeys = {},
+		    codes = this.keyCodes,
+		    i, len;
+		for (i = 0, len = codes.zoomIn.length; i < len; i++) {
+			keys[codes.zoomIn[i]] = zoomDelta;
+		}
+		for (i = 0, len = codes.zoomOut.length; i < len; i++) {
+			keys[codes.zoomOut[i]] = -zoomDelta;
+		}
+	},
+	_addHooks: function () {
+		on(document, 'keydown', this._onKeyDown, this);
+	},
+	_removeHooks: function () {
+		off(document, 'keydown', this._onKeyDown, this);
+	},
+	_onKeyDown: function (e) {
+		if (e.altKey || e.ctrlKey || e.metaKey) { return; }
+		var key = e.keyCode,
+		    map = this._map,
+		    offset;
+		if (key in this._panKeys) {
+			if (!map._panAnim || !map._panAnim._inProgress) {
+				offset = this._panKeys[key];
+				if (e.shiftKey) {
+					offset = toPoint(offset).multiplyBy(3);
+				}
+				if (map.options.maxBounds) {
+					offset = map._limitOffset(toPoint(offset), map.options.maxBounds);
+				}
+				if (map.options.worldCopyJump) {
+					var newLatLng = map.wrapLatLng(map.unproject(map.project(map.getCenter()).add(offset)));
+					map.panTo(newLatLng);
+				} else {
+					map.panBy(offset);
+				}
+			}
+		} else if (key in this._zoomKeys) {
+			map.setZoom(map.getZoom() + (e.shiftKey ? 3 : 1) * this._zoomKeys[key]);
+		} else if (key === 27 && map._popup && map._popup.options.closeOnEscapeKey) {
+			map.closePopup();
+		} else {
+			return;
+		}
+		stop(e);
+	}
+  });
+  Map.addInitHook('addHandler', 'keyboard', Keyboard);
+  Map.mergeOptions({
+	scrollWheelZoom: true,
+	wheelDebounceTime: 40,
+	wheelPxPerZoomLevel: 60
+  });
+  var ScrollWheelZoom = Handler.extend({
+	addHooks: function () {
+		on(this._map._container, 'wheel', this._onWheelScroll, this);
+		this._delta = 0;
+	},
+	removeHooks: function () {
+		off(this._map._container, 'wheel', this._onWheelScroll, this);
+	},
+	_onWheelScroll: function (e) {
+		var delta = getWheelDelta(e);
+		var debounce = this._map.options.wheelDebounceTime;
+		this._delta += delta;
+		this._lastMousePos = this._map.mouseEventToContainerPoint(e);
+		if (!this._startTime) {
+			this._startTime = +new Date();
+		}
+		var left = Math.max(debounce - (+new Date() - this._startTime), 0);
+		clearTimeout(this._timer);
+		this._timer = setTimeout(bind(this._performZoom, this), left);
+		stop(e);
+	},
+	_performZoom: function () {
+		var map = this._map,
+		    zoom = map.getZoom(),
+		    snap = this._map.options.zoomSnap || 0;
+		map._stop();
+		var d2 = this._delta / (this._map.options.wheelPxPerZoomLevel * 4),
+		    d3 = 4 * Math.log(2 / (1 + Math.exp(-Math.abs(d2)))) / Math.LN2,
+		    d4 = snap ? Math.ceil(d3 / snap) * snap : d3,
+		    delta = map._limitZoom(zoom + (this._delta > 0 ? d4 : -d4)) - zoom;
+		this._delta = 0;
+		this._startTime = null;
+		if (!delta) { return; }
+		if (map.options.scrollWheelZoom === 'center') {
+			map.setZoom(zoom + delta);
+		} else {
+			map.setZoomAround(this._lastMousePos, zoom + delta);
+		}
+	}
+  });
+  Map.addInitHook('addHandler', 'scrollWheelZoom', ScrollWheelZoom);
+  var tapHoldDelay = 600;
+  Map.mergeOptions({
+	tapHold: Browser.touchNative && Browser.safari && Browser.mobile,
+	tapTolerance: 15
+  });
+  var TapHold = Handler.extend({
+	addHooks: function () {
+		on(this._map._container, 'touchstart', this._onDown, this);
+	},
+	removeHooks: function () {
+		off(this._map._container, 'touchstart', this._onDown, this);
+	},
+	_onDown: function (e) {
+		clearTimeout(this._holdTimeout);
+		if (e.touches.length !== 1) { return; }
+		var first = e.touches[0];
+		this._startPos = this._newPos = new Point(first.clientX, first.clientY);
+		this._holdTimeout = setTimeout(bind(function () {
+			this._cancel();
+			if (!this._isTapValid()) { return; }
+			on(document, 'touchend', preventDefault);
+			on(document, 'touchend touchcancel', this._cancelClickPrevent);
+			this._simulateEvent('contextmenu', first);
+		}, this), tapHoldDelay);
+		on(document, 'touchend touchcancel contextmenu', this._cancel, this);
+		on(document, 'touchmove', this._onMove, this);
+	},
+	_cancelClickPrevent: function cancelClickPrevent() {
+		off(document, 'touchend', preventDefault);
+		off(document, 'touchend touchcancel', cancelClickPrevent);
+	},
+	_cancel: function () {
+		clearTimeout(this._holdTimeout);
+		off(document, 'touchend touchcancel contextmenu', this._cancel, this);
+		off(document, 'touchmove', this._onMove, this);
+	},
+	_onMove: function (e) {
+		var first = e.touches[0];
+		this._newPos = new Point(first.clientX, first.clientY);
+	},
+	_isTapValid: function () {
+		return this._newPos.distanceTo(this._startPos) <= this._map.options.tapTolerance;
+	},
+	_simulateEvent: function (type, e) {
+		var simulatedEvent = new MouseEvent(type, {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+			screenX: e.screenX,
+			screenY: e.screenY,
+			clientX: e.clientX,
+			clientY: e.clientY,
+		});
+		simulatedEvent._simulated = true;
+		e.target.dispatchEvent(simulatedEvent);
+	}
+  });
+  Map.addInitHook('addHandler', 'tapHold', TapHold);
+  Map.mergeOptions({
+	touchZoom: Browser.touch,
+	bounceAtZoomLimits: true
+  });
+  var TouchZoom = Handler.extend({
+	addHooks: function () {
+		addClass(this._map._container, 'leaflet-touch-zoom');
+		on(this._map._container, 'touchstart', this._onTouchStart, this);
+	},
+	removeHooks: function () {
+		removeClass(this._map._container, 'leaflet-touch-zoom');
+		off(this._map._container, 'touchstart', this._onTouchStart, this);
+	},
+	_onTouchStart: function (e) {
+		var map = this._map;
+		if (!e.touches || e.touches.length !== 2 || map._animatingZoom || this._zooming) { return; }
+		var p1 = map.mouseEventToContainerPoint(e.touches[0]),
+		    p2 = map.mouseEventToContainerPoint(e.touches[1]);
+		this._centerPoint = map.getSize()._divideBy(2);
+		this._startLatLng = map.containerPointToLatLng(this._centerPoint);
+		if (map.options.touchZoom !== 'center') {
+			this._pinchStartLatLng = map.containerPointToLatLng(p1.add(p2)._divideBy(2));
+		}
+		this._startDist = p1.distanceTo(p2);
+		this._startZoom = map.getZoom();
+		this._moved = false;
+		this._zooming = true;
+		map._stop();
+		on(document, 'touchmove', this._onTouchMove, this);
+		on(document, 'touchend touchcancel', this._onTouchEnd, this);
+		preventDefault(e);
+	},
+	_onTouchMove: function (e) {
+		if (!e.touches || e.touches.length !== 2 || !this._zooming) { return; }
+		var map = this._map,
+		    p1 = map.mouseEventToContainerPoint(e.touches[0]),
+		    p2 = map.mouseEventToContainerPoint(e.touches[1]),
+		    scale = p1.distanceTo(p2) / this._startDist;
+		this._zoom = map.getScaleZoom(scale, this._startZoom);
+		if (!map.options.bounceAtZoomLimits && (
+			(this._zoom < map.getMinZoom() && scale < 1) ||
+			(this._zoom > map.getMaxZoom() && scale > 1))) {
+			this._zoom = map._limitZoom(this._zoom);
+		}
+		if (map.options.touchZoom === 'center') {
+			this._center = this._startLatLng;
+			if (scale === 1) { return; }
+		} else {
+			var delta = p1._add(p2)._divideBy(2)._subtract(this._centerPoint);
+			if (scale === 1 && delta.x === 0 && delta.y === 0) { return; }
+			this._center = map.unproject(map.project(this._pinchStartLatLng, this._zoom).subtract(delta), this._zoom);
+		}
+		if (!this._moved) {
+			map._moveStart(true, false);
+			this._moved = true;
+		}
+		cancelAnimFrame(this._animRequest);
+		var moveFn = bind(map._move, map, this._center, this._zoom, {pinch: true, round: false}, undefined);
+		this._animRequest = requestAnimFrame(moveFn, this, true);
+		preventDefault(e);
+	},
+	_onTouchEnd: function () {
+		if (!this._moved || !this._zooming) {
+			this._zooming = false;
+			return;
+		}
+		this._zooming = false;
+		cancelAnimFrame(this._animRequest);
+		off(document, 'touchmove', this._onTouchMove, this);
+		off(document, 'touchend touchcancel', this._onTouchEnd, this);
+		if (this._map.options.zoomAnimation) {
+			this._map._animateZoom(this._center, this._map._limitZoom(this._zoom), true, this._map.options.zoomSnap);
+		} else {
+			this._map._resetView(this._center, this._map._limitZoom(this._zoom));
+		}
+	}
+  });
+  Map.addInitHook('addHandler', 'touchZoom', TouchZoom);
+  Map.BoxZoom = BoxZoom;
+  Map.DoubleClickZoom = DoubleClickZoom;
+  Map.Drag = Drag;
+  Map.Keyboard = Keyboard;
+  Map.ScrollWheelZoom = ScrollWheelZoom;
+  Map.TapHold = TapHold;
+  Map.TouchZoom = TouchZoom;
+  exports.Bounds = Bounds;
+  exports.Browser = Browser;
+  exports.CRS = CRS;
+  exports.Canvas = Canvas;
+  exports.Circle = Circle;
+  exports.CircleMarker = CircleMarker;
+  exports.Class = Class;
+  exports.Control = Control;
+  exports.DivIcon = DivIcon;
+  exports.DivOverlay = DivOverlay;
+  exports.DomEvent = DomEvent;
+  exports.DomUtil = DomUtil;
+  exports.Draggable = Draggable;
+  exports.Evented = Evented;
+  exports.FeatureGroup = FeatureGroup;
+  exports.GeoJSON = GeoJSON;
+  exports.GridLayer = GridLayer;
+  exports.Handler = Handler;
+  exports.Icon = Icon;
+  exports.ImageOverlay = ImageOverlay;
+  exports.LatLng = LatLng;
+  exports.LatLngBounds = LatLngBounds;
+  exports.Layer = Layer;
+  exports.LayerGroup = LayerGroup;
+  exports.LineUtil = LineUtil;
+  exports.Map = Map;
+  exports.Marker = Marker;
+  exports.Mixin = Mixin;
+  exports.Path = Path;
+  exports.Point = Point;
+  exports.PolyUtil = PolyUtil;
+  exports.Polygon = Polygon;
+  exports.Polyline = Polyline;
+  exports.Popup = Popup;
+  exports.PosAnimation = PosAnimation;
+  exports.Projection = index;
+  exports.Rectangle = Rectangle;
+  exports.Renderer = Renderer;
+  exports.SVG = SVG;
+  exports.SVGOverlay = SVGOverlay;
+  exports.TileLayer = TileLayer;
+  exports.Tooltip = Tooltip;
+  exports.Transformation = Transformation;
+  exports.Util = Util;
+  exports.VideoOverlay = VideoOverlay;
+  exports.bind = bind;
+  exports.bounds = toBounds;
+  exports.canvas = canvas;
+  exports.circle = circle;
+  exports.circleMarker = circleMarker;
+  exports.control = control;
+  exports.divIcon = divIcon;
+  exports.extend = extend;
+  exports.featureGroup = featureGroup;
+  exports.geoJSON = geoJSON;
+  exports.geoJson = geoJson;
+  exports.gridLayer = gridLayer;
+  exports.icon = icon;
+  exports.imageOverlay = imageOverlay;
+  exports.latLng = toLatLng;
+  exports.latLngBounds = toLatLngBounds;
+  exports.layerGroup = layerGroup;
+  exports.map = createMap;
+  exports.marker = marker;
+  exports.point = toPoint;
+  exports.polygon = polygon;
+  exports.polyline = polyline;
+  exports.popup = popup;
+  exports.rectangle = rectangle;
+  exports.setOptions = setOptions;
+  exports.stamp = stamp;
+  exports.svg = svg;
+  exports.svgOverlay = svgOverlay;
+  exports.tileLayer = tileLayer;
+  exports.tooltip = tooltip;
+  exports.transformation = toTransformation;
+  exports.version = version;
+  exports.videoOverlay = videoOverlay;
+  var oldL = window.L;
+  exports.noConflict = function() {
+	window.L = oldL;
+	return this;
+  }
+  window.L = exports;
+}));
