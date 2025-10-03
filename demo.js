@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Set the path for Leaflet's images
+  // Set the path for Atlas's images
   L.Icon.Default.imagePath = 'images/';
 
   // Define tile layers
