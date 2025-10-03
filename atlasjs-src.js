@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.leaflet = {}));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.atlas = {}));
 })(this, (function (exports) { 'use strict';
   var version = "0.0.1";
   function extend(dest) {
@@ -33,10 +33,10 @@
   }
   var lastId = 0;
   function stamp(obj) {
-	if (!('_leaflet_id' in obj)) {
-		obj['_leaflet_id'] = ++lastId;
+	if (!('_atlas_id' in obj)) {
+		obj['_atlas_id'] = ++lastId;
 	}
-	return obj._leaflet_id;
+	return obj._atlas_id;
   }
   function throttle(fn, time, context) {
 	var lock, args, wrapperFn, later;
@@ -234,10 +234,10 @@
 	if (typeof L === 'undefined' || !L || !L.Mixin) { return; }
 	includes = isArray(includes) ? includes : [includes];
 	for (var i = 0; i < includes.length; i++) {
-		if (includes[i] === L.Mixin.Events) {
-			console.warn('Deprecated include of L.Mixin.Events: ' +
+		if (includes[i] === atlas.Mixin.Events) {
+			console.warn('Deprecated include of atlas.Mixin.Events: ' +
 				'this property will be removed in future releases, ' +
-				'please inherit from L.Evented instead.', new Error().stack);
+				'please inherit from atlas.Evented instead.', new Error().stack);
 		}
 	}
   }
@@ -1029,14 +1029,14 @@
   var ie3d = ie && ('transition' in style);
   var webkit3d = ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()) && !android23;
   var gecko3d = 'MozPerspective' in style;
-  var any3d = !window.L_DISABLE_3D && (ie3d || webkit3d || gecko3d) && !opera12 && !phantom;
+  var any3d = !window.ATLAS_DISABLE_3D && (ie3d || webkit3d || gecko3d) && !opera12 && !phantom;
   var mobile = typeof orientation !== 'undefined' || userAgentContains('mobile');
   var mobileWebkit = mobile && webkit;
   var mobileWebkit3d = mobile && webkit3d;
   var msPointer = !window.PointerEvent && window.MSPointerEvent;
   var pointer = !!(window.PointerEvent || msPointer);
   var touchNative = 'ontouchstart' in window || !!window.TouchEvent;
-  var touch = !window.L_NO_TOUCH && (touchNative || pointer);
+  var touch = !window.ATLAS_NO_TOUCH && (touchNative || pointer);
   var mobileOpera = mobile && opera;
   var mobileGecko = mobile && gecko;
   var retina = (window.devicePixelRatio || (window.screen.deviceXDPI / window.screen.logicalXDPI)) > 1;
@@ -1377,7 +1377,7 @@
 		(scale ? ' scale(' + scale + ')' : '');
   }
   function setPosition(el, point) {
-	el._leaflet_pos = point;
+	el._atlas_pos = point;
 	if (Browser.any3d) {
 		setTransform(el, point);
 	} else {
@@ -1386,7 +1386,7 @@
 	}
   }
   function getPosition(el) {
-	return el._leaflet_pos || new Point(0, 0);
+	return el._atlas_pos || new Point(0, 0);
   }
   var disableTextSelection;
   var enableTextSelection;
@@ -1498,7 +1498,7 @@
 	}
 	return this;
   }
-  var eventsKey = '_leaflet_events';
+  var eventsKey = '_atlas_events';
   function off(obj, types, fn, context) {
 	if (arguments.length === 1) {
 		batchRemove(obj);
@@ -1596,7 +1596,7 @@
   }
   function disableClickPropagation(el) {
 	on(el, 'mousedown touchstart dblclick contextmenu', stopPropagation);
-	el['_leaflet_disable_click'] = true;
+	el['_atlas_disable_click'] = true;
 	return this;
   }
   function preventDefault(e) {
@@ -1875,7 +1875,7 @@
 			this.fire('movestart');
 		}
 		if (options.animate !== false) {
-			addClass(this._mapPane, 'leaflet-pan-anim');
+			addClass(this._mapPane, 'atlas-pan-anim');
 			var newPos = this._getMapPanePos().subtract(offset).round();
 			this._panAnim.run(this._mapPane, newPos, options.duration || 0.25, options.easeLinearity);
 		} else {
@@ -2083,7 +2083,7 @@
 		return this;
 	},
 	_handleGeolocationError: function (error) {
-		if (!this._container._leaflet_id) { return; }
+		if (!this._container._atlas_id) { return; }
 		var c = error.code,
 		    message = error.message ||
 		            (c === 1 ? 'permission denied' :
@@ -2097,7 +2097,7 @@
 		});
 	},
 	_handleGeolocationResponse: function (pos) {
-		if (!this._container._leaflet_id) { return; }
+		if (!this._container._atlas_id) { return; }
 		var lat = pos.coords.latitude,
 		    lng = pos.coords.longitude,
 		    latlng = new LatLng(lat, lng),
@@ -2131,14 +2131,14 @@
 	remove: function () {
 		this._initEvents(true);
 		if (this.options.maxBounds) { this.off('moveend', this._panInsideMaxBounds); }
-		if (this._containerId !== this._container._leaflet_id) {
+		if (this._containerId !== this._container._atlas_id) {
 			throw new Error('Map container is being reused by another instance');
 		}
 		try {
-			delete this._container._leaflet_id;
+			delete this._container._atlas_id;
 			delete this._containerId;
 		} catch (e) {
-			this._container._leaflet_id = undefined;
+			this._container._atlas_id = undefined;
 			this._containerId = undefined;
 		}
 		if (this._locationWatchId !== undefined) {
@@ -2171,7 +2171,7 @@
 		return this;
 	},
 	createPane: function (name, container) {
-		var className = 'leaflet-pane' + (name ? ' leaflet-' + name.replace('Pane', '') + '-pane' : ''),
+		var className = 'atlas-pane' + (name ? ' atlas-' + name.replace('Pane', '') + '-pane' : ''),
 		    pane = create$1('div', className, container || this._mapPane);
 		if (name) {
 			this._panes[name] = pane;
@@ -2314,7 +2314,7 @@
 		var container = this._container = get(id);
 		if (!container) {
 			throw new Error('Map container not found.');
-		} else if (container._leaflet_id) {
+		} else if (container._atlas_id) {
 			throw new Error('Map container is already initialized.');
 		}
 		on(container, 'scroll', this._onScroll, this);
@@ -2323,12 +2323,12 @@
 	_initLayout: function () {
 		var container = this._container;
 		this._fadeAnimated = this.options.fadeAnimation && Browser.any3d;
-		addClass(container, 'leaflet-container' +
-			(Browser.touch ? ' leaflet-touch' : '') +
-			(Browser.retina ? ' leaflet-retina' : '') +
-			(Browser.ielt9 ? ' leaflet-oldie' : '') +
-			(Browser.safari ? ' leaflet-safari' : '') +
-			(this._fadeAnimated ? ' leaflet-fade-anim' : ''));
+		addClass(container, 'atlas-container' +
+			(Browser.touch ? ' atlas-touch' : '') +
+			(Browser.retina ? ' atlas-retina' : '') +
+			(Browser.ielt9 ? ' atlas-oldie' : '') +
+			(Browser.safari ? ' atlas-safari' : '') +
+			(this._fadeAnimated ? ' atlas-fade-anim' : ''));
 		var position = getStyle(container, 'position');
 		if (position !== 'absolute' && position !== 'relative' && position !== 'fixed' && position !== 'sticky') {
 			container.style.position = 'relative';
@@ -2350,8 +2350,8 @@
 		this.createPane('tooltipPane');
 		this.createPane('popupPane');
 		if (!this.options.markerZoomAnimation) {
-			addClass(panes.markerPane, 'leaflet-zoom-hide');
-			addClass(panes.shadowPane, 'leaflet-zoom-hide');
+			addClass(panes.markerPane, 'atlas-zoom-hide');
+			addClass(panes.shadowPane, 'atlas-zoom-hide');
 		}
 	},
 	_resetView: function (center, zoom, noMoveStart) {
@@ -2481,13 +2481,13 @@
 	},
 	_isClickDisabled: function (el) {
 		while (el && el !== this._container) {
-			if (el['_leaflet_disable_click']) { return true; }
+			if (el['_atlas_disable_click']) { return true; }
 			el = el.parentNode;
 		}
 	},
 	_handleDOMEvent: function (e) {
 		var el = (e.target || e.srcElement);
-		if (!this._loaded || el['_leaflet_disable_events'] || e.type === 'click' && this._isClickDisabled(el)) {
+		if (!this._loaded || el['_atlas_disable_events'] || e.type === 'click' && this._isClickDisabled(el)) {
 			return;
 		}
 		var type = e.type;
@@ -2633,7 +2633,7 @@
 		this.fire('move');
 	},
 	_onPanTransitionEnd: function () {
-		removeClass(this._mapPane, 'leaflet-pan-anim');
+		removeClass(this._mapPane, 'atlas-pan-anim');
 		this.fire('moveend');
 	},
 	_tryAnimatedPan: function (center, options) {
@@ -2643,7 +2643,7 @@
 		return true;
 	},
 	_createAnimProxy: function () {
-		var proxy = this._proxy = create$1('div', 'leaflet-proxy leaflet-zoom-animated');
+		var proxy = this._proxy = create$1('div', 'atlas-proxy atlas-zoom-animated');
 		this._panes.mapPane.appendChild(proxy);
 		this.on('zoomanim', function (e) {
 			var prop = TRANSFORM,
@@ -2672,7 +2672,7 @@
 		}
 	},
 	_nothingToAnimate: function () {
-		return !this._container.getElementsByClassName('leaflet-zoom-animated').length;
+		return !this._container.getElementsByClassName('atlas-zoom-animated').length;
 	},
 	_tryAnimatedZoom: function (center, zoom, options) {
 		if (this._animatingZoom) { return true; }
@@ -2695,7 +2695,7 @@
 			this._animatingZoom = true;
 			this._animateToCenter = center;
 			this._animateToZoom = zoom;
-			addClass(this._mapPane, 'leaflet-zoom-anim');
+			addClass(this._mapPane, 'atlas-zoom-anim');
 		}
 		this.fire('zoomanim', {
 			center: center,
@@ -2711,7 +2711,7 @@
 	_onZoomTransitionEnd: function () {
 		if (!this._animatingZoom) { return; }
 		if (this._mapPane) {
-			removeClass(this._mapPane, 'leaflet-zoom-anim');
+			removeClass(this._mapPane, 'atlas-zoom-anim');
 		}
 		this._animatingZoom = false;
 		this._move(this._animateToCenter, this._animateToZoom, undefined, true);
@@ -2756,7 +2756,7 @@
 		var container = this._container = this.onAdd(map),
 		    pos = this.getPosition(),
 		    corner = map._controlCorners[pos];
-		addClass(container, 'leaflet-control');
+		addClass(container, 'atlas-control');
 		if (pos.indexOf('bottom') !== -1) {
 			corner.insertBefore(container, corner.firstChild);
 		} else {
@@ -2797,7 +2797,7 @@
 	},
 	_initControlPos: function () {
 		var corners = this._controlCorners = {},
-		    l = 'leaflet-',
+		    l = 'atlas-',
 		    container = this._controlContainer =
 		            create$1('div', l + 'control-container', this._container);
 		function createCorner(vSide, hSide) {
@@ -2880,24 +2880,24 @@
 		return (this._map) ? this._update() : this;
 	},
 	expand: function () {
-		addClass(this._container, 'leaflet-control-layers-expanded');
+		addClass(this._container, 'atlas-control-layers-expanded');
 		this._section.style.height = null;
 		var acceptableHeight = this._map.getSize().y - (this._container.offsetTop + 50);
 		if (acceptableHeight < this._section.clientHeight) {
-			addClass(this._section, 'leaflet-control-layers-scrollbar');
+			addClass(this._section, 'atlas-control-layers-scrollbar');
 			this._section.style.height = acceptableHeight + 'px';
 		} else {
-			removeClass(this._section, 'leaflet-control-layers-scrollbar');
+			removeClass(this._section, 'atlas-control-layers-scrollbar');
 		}
 		this._checkDisabledLayers();
 		return this;
 	},
 	collapse: function () {
-		removeClass(this._container, 'leaflet-control-layers-expanded');
+		removeClass(this._container, 'atlas-control-layers-expanded');
 		return this;
 	},
 	_initLayout: function () {
-		var className = 'leaflet-control-layers',
+		var className = 'atlas-control-layers',
 		    container = this._container = create$1('div', className),
 		    collapsed = this.options.collapsed;
 		container.setAttribute('aria-haspopup', true);
@@ -2994,7 +2994,7 @@
 		}
 	},
 	_createRadioElement: function (name, checked) {
-		var radioHtml = '<input type="radio" class="leaflet-control-layers-selector" name="' +
+		var radioHtml = '<input type="radio" class="atlas-control-layers-selector" name="' +
 				name + '"' + (checked ? ' checked="checked"' : '') + '/>';
 		var radioFragment = document.createElement('div');
 		radioFragment.innerHTML = radioHtml;
@@ -3007,10 +3007,10 @@
 		if (obj.overlay) {
 			input = document.createElement('input');
 			input.type = 'checkbox';
-			input.className = 'leaflet-control-layers-selector';
+			input.className = 'atlas-control-layers-selector';
 			input.defaultChecked = checked;
 		} else {
-			input = this._createRadioElement('leaflet-base-layers_' + stamp(this), checked);
+			input = this._createRadioElement('atlas-base-layers_' + stamp(this), checked);
 		}
 		this._layerControlInputs.push(input);
 		input.layerId = stamp(obj.layer);
@@ -3099,8 +3099,8 @@
 		zoomOutTitle: 'Zoom out'
 	},
 	onAdd: function (map) {
-		var zoomName = 'leaflet-control-zoom',
-		    container = create$1('div', zoomName + ' leaflet-bar'),
+		var zoomName = 'atlas-control-zoom',
+		    container = create$1('div', zoomName + ' atlas-bar'),
 		    options = this.options;
 		this._zoomInButton  = this._createButton(options.zoomInText, options.zoomInTitle,
 		        zoomName + '-in',  container, this._zoomIn);
@@ -3148,7 +3148,7 @@
 	},
 	_updateDisabled: function () {
 		var map = this._map,
-		    className = 'leaflet-disabled';
+		    className = 'atlas-disabled';
 		removeClass(this._zoomInButton, className);
 		removeClass(this._zoomOutButton, className);
 		this._zoomInButton.setAttribute('aria-disabled', 'false');
@@ -3183,7 +3183,7 @@
 		imperial: true
 	},
 	onAdd: function (map) {
-		var className = 'leaflet-control-scale',
+		var className = 'atlas-control-scale',
 		    container = create$1('div', className),
 		    options = this.options;
 		this._addScales(options, className + '-line', container);
@@ -3252,11 +3252,11 @@
   var scale = function (options) {
 	return new Scale(options);
   };
-  var ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"/><path fill="#FFD500" d="M0 4h12v3H0z"/><path fill="#E0BC00" d="M0 7h12v1H0z"/></svg>';
+  var ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="atlas-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"/><path fill="#FFD500" d="M0 4h12v3H0z"/><path fill="#E0BC00" d="M0 7h12v1H0z"/></svg>';
   var Attribution = Control.extend({
 	options: {
 		position: 'bottomright',
-		prefix: '<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
+		prefix: '<a href="https://atlasjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
 	},
 	initialize: function (options) {
 		setOptions(this, options);
@@ -3264,7 +3264,7 @@
 	},
 	onAdd: function (map) {
 		map.attributionControl = this;
-		this._container = create$1('div', 'leaflet-control-attribution');
+		this._container = create$1('div', 'atlas-control-attribution');
 		disableClickPropagation(this._container);
 		for (var i in map._layers) {
 			if (map._layers[i].getAttribution) {
@@ -3398,7 +3398,7 @@
 	_onDown: function (e) {
 		if (!this._enabled) { return; }
 		this._moved = false;
-		if (hasClass(this._element, 'leaflet-zoom-anim')) { return; }
+		if (hasClass(this._element, 'atlas-zoom-anim')) { return; }
 		if (e.touches && e.touches.length !== 1) {
 			if (Draggable._dragging === this) {
 				this.finishDrag();
@@ -3439,12 +3439,12 @@
 		if (!this._moved) {
 			this.fire('dragstart');
 			this._moved = true;
-			addClass(document.body, 'leaflet-dragging');
+			addClass(document.body, 'atlas-dragging');
 			this._lastTarget = e.target || e.srcElement;
 			if (window.SVGElementInstance && this._lastTarget instanceof window.SVGElementInstance) {
 				this._lastTarget = this._lastTarget.correspondingUseElement;
 			}
-			addClass(this._lastTarget, 'leaflet-drag-target');
+			addClass(this._lastTarget, 'atlas-drag-target');
 		}
 		this._newPos = this._startPos.add(offset);
 		this._moving = true;
@@ -3462,9 +3462,9 @@
 		this.finishDrag();
 	},
 	finishDrag: function (noInertia) {
-		removeClass(document.body, 'leaflet-dragging');
+		removeClass(document.body, 'atlas-dragging');
 		if (this._lastTarget) {
-			removeClass(this._lastTarget, 'leaflet-drag-target');
+			removeClass(this._lastTarget, 'atlas-drag-target');
 			this._lastTarget = null;
 		}
 		off(document, 'mousemove touchmove', this._onMove, this);
@@ -3719,7 +3719,7 @@
 	return !isArray(latlngs[0]) || (typeof latlngs[0][0] !== 'object' && typeof latlngs[0][0] !== 'undefined');
   }
   function _flat(latlngs) {
-	console.warn('Deprecated use of _flat, please use L.LineUtil.isFlat instead.');
+	console.warn('Deprecated use of _flat, please use atlas.LineUtil.isFlat instead.');
 	return isFlat(latlngs);
   }
   function polylineCenter(latlngs, crs) {
@@ -4145,7 +4145,7 @@
 		var size = toPoint(sizeOption),
 		    anchor = toPoint(name === 'shadow' && options.shadowAnchor || options.iconAnchor ||
 		            size && size.divideBy(2, true));
-		img.className = 'leaflet-marker-' + name + ' ' + (options.className || '');
+		img.className = 'atlas-marker-' + name + ' ' + (options.className || '');
 		if (anchor) {
 			img.style.marginLeft = (-anchor.x) + 'px';
 			img.style.marginTop  = (-anchor.y) + 'px';
@@ -4193,19 +4193,19 @@
 		return path && strip(path, /^(.*)marker-icon\.png$/, 1);
 	},
 	_detectIconPath: function () {
-		var el = create$1('div',  'leaflet-default-icon-path', document.body);
+		var el = create$1('div',  'atlas-default-icon-path', document.body);
 		var path = getStyle(el, 'background-image') ||
 		           getStyle(el, 'backgroundImage');	// IE8
 		document.body.removeChild(el);
 		path = this._stripUrl(path);
 		if (path) { return path; }
-		var link = document.querySelector('link[href$="leaflet.css"]');
+		var link = document.querySelector('link[href$="atlas.css"]');
 		if (!link) { return ''; }
-		return link.href.substring(0, link.href.length - 'leaflet.css'.length - 1);
+		return link.href.substring(0, link.href.length - 'atlas.css'.length - 1);
 	}
   });
   /*
-   * L.Handler.MarkerDrag is used internally by L.Marker to make the markers draggable.
+   * atlas.Handler.MarkerDrag is used internally by atlas.Marker to make the markers draggable.
    */
   /* @namespace Marker
    * @section Interaction handlers
@@ -4234,7 +4234,7 @@
 			drag: this._onDrag,
 			dragend: this._onDragEnd
 		}, this).enable();
-		addClass(icon, 'leaflet-marker-draggable');
+		addClass(icon, 'atlas-marker-draggable');
 	},
 	removeHooks: function () {
 		this._draggable.off({
@@ -4244,7 +4244,7 @@
 			dragend: this._onDragEnd
 		}, this).disable();
 		if (this._marker._icon) {
-			removeClass(this._marker._icon, 'leaflet-marker-draggable');
+			removeClass(this._marker._icon, 'atlas-marker-draggable');
 		}
 	},
 	moved: function () {
@@ -4330,13 +4330,13 @@
   /*
    * @class Marker
    * @inherits Interactive layer
-   * @aka L.Marker
-   * L.Marker is used to display clickable/draggable icons on the map. Extends `Layer`.
+   * @aka atlas.Marker
+   * atlas.Marker is used to display clickable/draggable icons on the map. Extends `Layer`.
    *
    * @example
    *
    * ```js
-   * L.marker([50.5, 30.5]).addTo(map);
+   * atlas.marker([50.5, 30.5]).addTo(map);
    * ```
    */
   var Marker = Layer.extend({
@@ -4345,8 +4345,8 @@
 	options: {
 		// @option icon: Icon = *
 		// Icon instance to use for rendering the marker.
-		// See [Icon documentation](#L.Icon) for details on how to customize the marker icon.
-		// If not specified, a common instance of `L.Icon.Default` is used.
+		// See [Icon documentation](#atlas.Icon) for details on how to customize the marker icon.
+		// If not specified, a common instance of `atlas.Icon.Default` is used.
 		icon: new IconDefault(),
 		// Option inherited from "Interactive layer" abstract class
 		interactive: true,
@@ -4355,11 +4355,11 @@
 		keyboard: true,
 		// @option title: String = ''
 		// Text for the browser tooltip that appear on marker hover (no tooltip by default).
-		// [Useful for accessibility](https://leafletjs.com/examples/accessibility/#markers-must-be-labelled).
+		// [Useful for accessibility](https://atlasjs.com/examples/accessibility/#markers-must-be-labelled).
 		title: '',
 		// @option alt: String = 'Marker'
 		// Text for the `alt` attribute of the icon image.
-		// [Useful for accessibility](https://leafletjs.com/examples/accessibility/#markers-must-be-labelled).
+		// [Useful for accessibility](https://atlasjs.com/examples/accessibility/#markers-must-be-labelled).
 		alt: 'Marker',
 		// @option zIndexOffset: Number = 0
 		// By default, marker images zIndex is set automatically based on its latitude. Use this option if you want to put the marker on top of all others (or below), specifying a high value like `1000` (or high negative value, respectively).
@@ -4381,7 +4381,7 @@
 		shadowPane: 'shadowPane',
 		// @option bubblingMouseEvents: Boolean = false
 		// When `true`, a mouse event on this marker will trigger the same event on the map
-		// (unless [`L.DomEvent.stopPropagation`](#domevent-stoppropagation) is used).
+		// (unless [`atlas.DomEvent.stopPropagation`](#domevent-stoppropagation) is used).
 		bubblingMouseEvents: false,
 		// @option autoPanOnFocus: Boolean = true
 		// When `true`, the map will pan whenever the marker is focused (via
@@ -4462,7 +4462,7 @@
 	},
 	_initIcon: function () {
 		var options = this.options,
-		    classToAdd = 'leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
+		    classToAdd = 'atlas-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
 		var icon = options.icon.createIcon(this._icon),
 		    addIcon = false;
 		if (icon !== this._icon) {
@@ -4555,7 +4555,7 @@
 	},
 	_initInteraction: function () {
 		if (!this.options.interactive) { return; }
-		addClass(this._icon, 'leaflet-interactive');
+		addClass(this._icon, 'atlas-interactive');
 		this.addInteractiveTarget(this._icon);
 		if (MarkerDrag) {
 			var draggable = this.options.draggable;
@@ -5311,7 +5311,7 @@
 			}
 		}
 		if (this.options.interactive) {
-			addClass(this._image, 'leaflet-interactive');
+			addClass(this._image, 'atlas-interactive');
 			this.addInteractiveTarget(this._image);
 		}
 		this.getPane().appendChild(this._image);
@@ -5386,8 +5386,8 @@
 	_initImage: function () {
 		var wasElementSupplied = this._url.tagName === 'IMG';
 		var img = this._image = wasElementSupplied ? this._url : create$1('img');
-		addClass(img, 'leaflet-image-layer');
-		if (this._zoomAnimated) { addClass(img, 'leaflet-zoom-animated'); }
+		addClass(img, 'atlas-image-layer');
+		if (this._zoomAnimated) { addClass(img, 'atlas-zoom-animated'); }
 		if (this.options.className) { addClass(img, this.options.className); }
 		img.onselectstart = falseFn;
 		img.onmousemove = falseFn;
@@ -5455,8 +5455,8 @@
 	_initImage: function () {
 		var wasElementSupplied = this._url.tagName === 'VIDEO';
 		var vid = this._image = wasElementSupplied ? this._url : create$1('video');
-		addClass(vid, 'leaflet-image-layer');
-		if (this._zoomAnimated) { addClass(vid, 'leaflet-zoom-animated'); }
+		addClass(vid, 'atlas-image-layer');
+		if (this._zoomAnimated) { addClass(vid, 'atlas-zoom-animated'); }
 		if (this.options.className) { addClass(vid, this.options.className); }
 		vid.onselectstart = falseFn;
 		vid.onmousemove = falseFn;
@@ -5491,8 +5491,8 @@
   var SVGOverlay = ImageOverlay.extend({
 	_initImage: function () {
 		var el = this._image = this._url;
-		addClass(el, 'leaflet-image-layer');
-		if (this._zoomAnimated) { addClass(el, 'leaflet-zoom-animated'); }
+		addClass(el, 'atlas-image-layer');
+		if (this._zoomAnimated) { addClass(el, 'atlas-zoom-animated'); }
 		if (this.options.className) { addClass(el, this.options.className); }
 		el.onselectstart = falseFn;
 		el.onmousemove = falseFn;
@@ -5564,7 +5564,7 @@
 		}
 		this.bringToFront();
 		if (this.options.interactive) {
-			addClass(this._container, 'leaflet-interactive');
+			addClass(this._container, 'atlas-interactive');
 			this.addInteractiveTarget(this._container);
 		}
 	},
@@ -5576,7 +5576,7 @@
 			remove(this._container);
 		}
 		if (this.options.interactive) {
-			removeClass(this._container, 'leaflet-interactive');
+			removeClass(this._container, 'atlas-interactive');
 			this.removeInteractiveTarget(this._container);
 		}
 	},
@@ -5782,10 +5782,10 @@
 		return events;
 	},
 	_initLayout: function () {
-		var prefix = 'leaflet-popup',
+		var prefix = 'atlas-popup',
 		    container = this._container = create$1('div',
 			prefix + ' ' + (this.options.className || '') +
-			' leaflet-zoom-animated');
+			' atlas-zoom-animated');
 		var wrapper = this._wrapper = create$1('div', prefix + '-content-wrapper', container);
 		this._contentNode = create$1('div', prefix + '-content', wrapper);
 		disableClickPropagation(container);
@@ -5818,7 +5818,7 @@
 		style.height = '';
 		var height = container.offsetHeight,
 		    maxHeight = this.options.maxHeight,
-		    scrolledClass = 'leaflet-popup-scrolled';
+		    scrolledClass = 'atlas-popup-scrolled';
 		if (maxHeight && height > maxHeight) {
 			style.height = maxHeight + 'px';
 			addClass(container, scrolledClass);
@@ -6019,11 +6019,11 @@
 		return events;
 	},
 	_initLayout: function () {
-		var prefix = 'leaflet-tooltip',
-		    className = prefix + ' ' + (this.options.className || '') + ' leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
+		var prefix = 'atlas-tooltip',
+		    className = prefix + ' ' + (this.options.className || '') + ' atlas-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
 		this._contentNode = this._container = create$1('div', className);
 		this._container.setAttribute('role', 'tooltip');
-		this._container.setAttribute('id', 'leaflet-tooltip-' + stamp(this));
+		this._container.setAttribute('id', 'atlas-tooltip-' + stamp(this));
 	},
 	_updateLayout: function () {},
 	_adjustPan: function () {},
@@ -6063,11 +6063,11 @@
 			subY = tooltipHeight / 2;
 		}
 		pos = pos.subtract(toPoint(subX, subY, true)).add(offset).add(anchor);
-		removeClass(container, 'leaflet-tooltip-right');
-		removeClass(container, 'leaflet-tooltip-left');
-		removeClass(container, 'leaflet-tooltip-top');
-		removeClass(container, 'leaflet-tooltip-bottom');
-		addClass(container, 'leaflet-tooltip-' + direction);
+		removeClass(container, 'atlas-tooltip-right');
+		removeClass(container, 'atlas-tooltip-left');
+		removeClass(container, 'atlas-tooltip-top');
+		removeClass(container, 'atlas-tooltip-bottom');
+		addClass(container, 'atlas-tooltip-' + direction);
 		setPosition(container, pos);
 	},
 	_updatePosition: function () {
@@ -6240,7 +6240,7 @@
 		iconSize: [12, 12],
 		html: false,
 		bgPos: null,
-		className: 'leaflet-div-icon'
+		className: 'atlas-div-icon'
 	},
 	createIcon: function (oldIcon) {
 		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
@@ -6421,7 +6421,7 @@
 	_onOpaqueTile: falseFn,
 	_initContainer: function () {
 		if (this._container) { return; }
-		this._container = create$1('div', 'leaflet-layer ' + (this.options.className || ''));
+		this._container = create$1('div', 'atlas-layer ' + (this.options.className || ''));
 		this._updateZIndex();
 		if (this.options.opacity < 1) {
 			this._updateOpacity();
@@ -6448,7 +6448,7 @@
 		    map = this._map;
 		if (!level) {
 			level = this._levels[zoom] = {};
-			level.el = create$1('div', 'leaflet-tile-container leaflet-zoom-animated', this._container);
+			level.el = create$1('div', 'atlas-tile-container atlas-zoom-animated', this._container);
 			level.el.style.zIndex = maxZoom;
 			level.origin = map.project(map.unproject(map.getPixelOrigin()), zoom).round();
 			level.zoom = zoom;
@@ -6743,7 +6743,7 @@
 		});
 	},
 	_initTile: function (tile) {
-		addClass(tile, 'leaflet-tile');
+		addClass(tile, 'atlas-tile');
 		var tileSize = this.getTileSize();
 		tile.style.width = tileSize.x + 'px';
 		tile.style.height = tileSize.y + 'px';
@@ -6794,7 +6794,7 @@
 			this._pruneTiles();
 		}
 		if (!err) {
-			addClass(tile.el, 'leaflet-tile-loaded');
+			addClass(tile.el, 'atlas-tile-loaded');
 			this.fire('tileload', {
 				tile: tile.el,
 				coords: coords
@@ -7055,7 +7055,7 @@
 	onAdd: function () {
 		if (!this._container) {
 			this._initContainer();
-			addClass(this._container, 'leaflet-zoom-animated');
+			addClass(this._container, 'atlas-zoom-animated');
 		}
 		this.getPane().appendChild(this._container);
 		this._update();
@@ -7142,7 +7142,7 @@
 		on(container, 'mousemove', this._onMouseMove, this);
 		on(container, 'click dblclick mousedown mouseup contextmenu', this._onClick, this);
 		on(container, 'mouseout', this._handleMouseOut, this);
-		container['_leaflet_disable_events'] = true;
+		container['_atlas_disable_events'] = true;
 		this._ctx = container.getContext('2d');
 	},
 	_destroyContainer: function () {
@@ -7375,7 +7375,7 @@
 	_handleMouseOut: function (e) {
 		var layer = this._hoveredLayer;
 		if (layer) {
-			removeClass(this._container, 'leaflet-interactive');
+			removeClass(this._container, 'atlas-interactive');
 			this._fireEvent([layer], e, 'mouseout');
 			this._hoveredLayer = null;
 			this._mouseHoverThrottled = false;
@@ -7395,7 +7395,7 @@
 		if (candidateHoveredLayer !== this._hoveredLayer) {
 			this._handleMouseOut(e);
 			if (candidateHoveredLayer) {
-				addClass(this._container, 'leaflet-interactive');
+				addClass(this._container, 'atlas-interactive');
 				this._fireEvent([candidateHoveredLayer], e, 'mouseover');
 				this._hoveredLayer = candidateHoveredLayer;
 			}
@@ -7469,7 +7469,7 @@
   })();
   var vmlMixin = {
 	_initContainer: function () {
-		this._container = create$1('div', 'leaflet-vml-container');
+		this._container = create$1('div', 'atlas-vml-container');
 	},
 	_update: function () {
 		if (this._map._animatingZoom) { return; }
@@ -7478,7 +7478,7 @@
 	},
 	_initPath: function (layer) {
 		var container = layer._container = vmlCreate('shape');
-		addClass(container, 'leaflet-vml-shape ' + (this.options.className || ''));
+		addClass(container, 'atlas-vml-shape ' + (this.options.className || ''));
 		container.coordsize = '1 1';
 		layer._path = vmlCreate('path');
 		container.appendChild(layer._path);
@@ -7591,7 +7591,7 @@
 			addClass(path, layer.options.className);
 		}
 		if (layer.options.interactive) {
-			addClass(path, 'leaflet-interactive');
+			addClass(path, 'atlas-interactive');
 		}
 		this._updateStyle(layer);
 		this._layers[stamp(layer)] = layer;
@@ -7777,8 +7777,8 @@
 	_onMouseMove: function (e) {
 		if (!this._moved) {
 			this._moved = true;
-			this._box = create$1('div', 'leaflet-zoom-box', this._container);
-			addClass(this._container, 'leaflet-crosshair');
+			this._box = create$1('div', 'atlas-zoom-box', this._container);
+			addClass(this._container, 'atlas-crosshair');
 			this._map.fire('boxzoomstart');
 		}
 		this._point = this._map.mouseEventToContainerPoint(e);
@@ -7791,7 +7791,7 @@
 	_finish: function () {
 		if (this._moved) {
 			remove(this._box);
-			removeClass(this._container, 'leaflet-crosshair');
+			removeClass(this._container, 'atlas-crosshair');
 		}
 		enableTextSelection();
 		enableImageDrag();
@@ -7873,14 +7873,14 @@
 				map.whenReady(this._onZoomEnd, this);
 			}
 		}
-		addClass(this._map._container, 'leaflet-grab leaflet-touch-drag');
+		addClass(this._map._container, 'atlas-grab atlas-touch-drag');
 		this._draggable.enable();
 		this._positions = [];
 		this._times = [];
 	},
 	removeHooks: function () {
-		removeClass(this._map._container, 'leaflet-grab');
-		removeClass(this._map._container, 'leaflet-touch-drag');
+		removeClass(this._map._container, 'atlas-grab');
+		removeClass(this._map._container, 'atlas-touch-drag');
 		this._draggable.disable();
 	},
 	moved: function () {
@@ -8231,11 +8231,11 @@
   });
   var TouchZoom = Handler.extend({
 	addHooks: function () {
-		addClass(this._map._container, 'leaflet-touch-zoom');
+		addClass(this._map._container, 'atlas-touch-zoom');
 		on(this._map._container, 'touchstart', this._onTouchStart, this);
 	},
 	removeHooks: function () {
-		removeClass(this._map._container, 'leaflet-touch-zoom');
+		removeClass(this._map._container, 'atlas-touch-zoom');
 		off(this._map._container, 'touchstart', this._onTouchStart, this);
 	},
 	_onTouchStart: function (e) {
@@ -8388,10 +8388,10 @@
   exports.transformation = toTransformation;
   exports.version = version;
   exports.videoOverlay = videoOverlay;
-  var oldL = window.L;
+  var oldL = window.atlas;
   exports.noConflict = function() {
-	window.L = oldL;
+	window.atlas = oldL;
 	return this;
   }
-  window.L = exports;
+  window.atlas = exports;
 }));
