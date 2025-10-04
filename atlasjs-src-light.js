@@ -3234,11 +3234,11 @@
   var scale = function (options) {
 	return new Scale(options);
   };
- var ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="atlas-attribution-flag"><rect width="12" height="8" fill="#c1272d"/><path d="M6 2l1.176 3.608H3.824L5 3.392 6 2z" fill="#006233"/></svg>';
+ var MoroccanFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="atlas-attribution-flag"><rect width="12" height="8" fill="#c1272d"/><path d="M6 2l1.176 3.608H3.824L5 3.392 6 2z" fill="#006233"/></svg>';
  var Attribution = Control.extend({
 	options: {
 		position: 'bottomright',
-		prefix: '<a href="https://atlasjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? ukrainianFlag + ' ' : '') + 'Atlas</a>'
+		prefix: '<a href="https://atlasjs.com" title="A JavaScript library for interactive maps">' + (Browser.inlineSvg ? MoroccanFlag + ' ' : '') + 'Atlas</a>'
 	},
 	initialize: function (options) {
 		setOptions(this, options);
