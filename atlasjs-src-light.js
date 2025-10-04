@@ -8191,10 +8191,10 @@
   exports.transformation = toTransformation;
   exports.version = version;
   exports.videoOverlay = videoOverlay;
-  var oldL = window.atlas;
+ /* var oldL = window.atlas;
   exports.noConflict = function() {
 	window.atlas = oldL;
 	return this;
   }
-  window.atlas = exports;
+  window.atlas = exports; */
 }));
