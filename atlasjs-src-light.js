@@ -999,6 +999,7 @@
   function svgCreate(name) {
 	return document.createElementNS('http://www.w3.org/2000/svg', name);
   }
+  var create = svgCreate;
   function pointsToPath(rings, closed) {
 	var str = '',
 	i, j, len, len2, points, p;
@@ -1013,8 +1014,6 @@
 	return str || 'M0 0';
   }
   var style = document.documentElement.style;
-  var ie = 'ActiveXObject' in window;
-  var ielt9 = ie && !document.addEventListener;
   var edge = 'msLaunchUri' in navigator && !('documentMode' in document);
   var webkit = userAgentContains('webkit');
   var android = userAgentContains('android');
@@ -1023,15 +1022,14 @@
   var androidStock = android && userAgentContains('Google') && webkitVer < 537 && !('AudioNode' in window);
   var opera = !!window.opera;
   var chrome = !edge && userAgentContains('chrome');
-  var gecko = userAgentContains('gecko') && !webkit && !opera && !ie;
+  var gecko = userAgentContains('gecko') && !webkit && !opera;
   var safari = !chrome && userAgentContains('safari');
   var phantom = userAgentContains('phantom');
   var opera12 = 'OTransition' in style;
   var win = navigator.platform.indexOf('Win') === 0;
-  var ie3d = ie && ('transition' in style);
   var webkit3d = ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()) && !android23;
   var gecko3d = 'MozPerspective' in style;
-  var any3d = !window.ATLAS_DISABLE_3D && (ie3d || webkit3d || gecko3d) && !opera12 && !phantom;
+  var any3d = !window.ATLAS_DISABLE_3D && (webkit3d || gecko3d) && !opera12 && !phantom;
   var mobile = typeof orientation !== 'undefined' || userAgentContains('mobile');
   var mobileWebkit = mobile && webkit;
   var mobileWebkit3d = mobile && webkit3d;
@@ -1059,31 +1057,18 @@
   var canvas$1 = (function () {
 	return !!document.createElement('canvas').getContext;
   }());
-  var svg$1 = !!(document.createElementNS && svgCreate('svg').createSVGRect);
+  var svg$1 = !!(document.createElementNS && create('svg').createSVGRect);
   var inlineSvg = !!svg$1 && (function () {
 	var div = document.createElement('div');
 	div.innerHTML = '<svg/>';
 	return (div.firstChild && div.firstChild.namespaceURI) === 'http://www.w3.org/2000/svg';
   })();
-  var vml = !svg$1 && (function () {
-	try {
-		var div = document.createElement('div');
-		div.innerHTML = '<v:shape adj="1"/>';
-		var shape = div.firstChild;
-		shape.style.behavior = 'url(#default#VML)';
-		return shape && (typeof shape.adj === 'object');
-	} catch (e) {
-		return false;
-	}
-  }());
   var mac = navigator.platform.indexOf('Mac') === 0;
   var linux = navigator.platform.indexOf('Linux') === 0;
   function userAgentContains(str) {
 	return navigator.userAgent.toLowerCase().indexOf(str) >= 0;
   }
   var Browser = {
-	ie: ie,
-	ielt9: ielt9,
 	edge: edge,
 	webkit: webkit,
 	android: android,
@@ -1096,7 +1081,6 @@
 	phantom: phantom,
 	opera12: opera12,
 	win: win,
-	ie3d: ie3d,
 	webkit3d: webkit3d,
 	gecko3d: gecko3d,
 	any3d: any3d,
@@ -1113,7 +1097,6 @@
 	passiveEvents: passiveEvents,
 	canvas: canvas$1,
 	svg: svg$1,
-	vml: vml,
 	inlineSvg: inlineSvg,
 	mac: mac,
 	linux: linux
@@ -1373,9 +1356,7 @@
   function setTransform(el, offset, scale) {
 	var pos = offset || new Point(0, 0);
 	el.style[TRANSFORM] =
-		(Browser.ie3d ?
-			'translate(' + pos.x + 'px,' + pos.y + 'px)' :
-			'translate3d(' + pos.x + 'px,' + pos.y + 'px,0)') +
+		'translate3d(' + pos.x + 'px,' + pos.y + 'px,0)' +
 		(scale ? ' scale(' + scale + ')' : '');
   }
   function setPosition(el, point) {
@@ -2328,7 +2309,6 @@
 		addClass(container, 'atlas-container' +
 			(Browser.touch ? ' atlas-touch' : '') +
 			(Browser.retina ? ' atlas-retina' : '') +
-			(Browser.ielt9 ? ' atlas-oldie' : '') +
 			(Browser.safari ? ' atlas-safari' : '') +
 			(this._fadeAnimated ? ' atlas-fade-anim' : ''));
 		var position = getStyle(container, 'position');
@@ -3782,87 +3762,13 @@
     _flat: _flat,
     polylineCenter: polylineCenter
   };
-  var LonLat = {
-	project: function (latlng) {
-		return new Point(latlng.lng, latlng.lat);
-	},
-	unproject: function (point) {
-		return new LatLng(point.y, point.x);
-	},
-	bounds: new Bounds([-180, -90], [180, 90])
-  };
-  var Mercator = {
-	R: 6378137,
-	R_MINOR: 6356752.314245179,
-	bounds: new Bounds([-20037508.34279, -15496570.73972], [20037508.34279, 18764656.23138]),
-	project: function (latlng) {
-		var d = Math.PI / 180,
-		    r = this.R,
-		    y = latlng.lat * d,
-		    tmp = this.R_MINOR / r,
-		    e = Math.sqrt(1 - tmp * tmp),
-		    con = e * Math.sin(y);
-		var ts = Math.tan(Math.PI / 4 - y / 2) / Math.pow((1 - con) / (1 + con), e / 2);
-		y = -r * Math.log(Math.max(ts, 1E-10));
-		return new Point(latlng.lng * d * r, y);
-	},
-	unproject: function (point) {
-		var d = 180 / Math.PI,
-		    r = this.R,
-		    tmp = this.R_MINOR / r,
-		    e = Math.sqrt(1 - tmp * tmp),
-		    ts = Math.exp(-point.y / r),
-		    phi = Math.PI / 2 - 2 * Math.atan(ts);
-		for (var i = 0, dphi = 0.1, con; i < 15 && Math.abs(dphi) > 1e-7; i++) {
-			con = e * Math.sin(phi);
-			con = Math.pow((1 - con) / (1 + con), e / 2);
-			dphi = Math.PI / 2 - 2 * Math.atan(ts * con) - phi;
-			phi += dphi;
-		}
-		return new LatLng(phi * d, point.x * d / r);
-	}
-  };
   var index = {
     __proto__: null,
-    LonLat: LonLat,
-    Mercator: Mercator,
     SphericalMercator: SphericalMercator
   };
-  var EPSG3395 = extend({}, Earth, {
-	code: 'EPSG:3395',
-	projection: Mercator,
-	transformation: (function () {
-		var scale = 0.5 / (Math.PI * Mercator.R);
-		return toTransformation(scale, 0.5, -scale, 0.5);
-	}())
-  });
-  var EPSG4326 = extend({}, Earth, {
-	code: 'EPSG:4326',
-	projection: LonLat,
-	transformation: toTransformation(1 / 180, 1, -1 / 180, 0.5)
-  });
-  var Simple = extend({}, CRS, {
-	projection: LonLat,
-	transformation: toTransformation(1, 0, -1, 0),
-	scale: function (zoom) {
-		return Math.pow(2, zoom);
-	},
-	zoom: function (scale) {
-		return Math.log(scale) / Math.LN2;
-	},
-	distance: function (latlng1, latlng2) {
-		var dx = latlng2.lng - latlng1.lng,
-		    dy = latlng2.lat - latlng1.lat;
-		return Math.sqrt(dx * dx + dy * dy);
-	},
-	infinite: true
-  });
   CRS.Earth = Earth;
-  CRS.EPSG3395 = EPSG3395;
   CRS.EPSG3857 = EPSG3857;
   CRS.EPSG900913 = EPSG900913;
-  CRS.EPSG4326 = EPSG4326;
-  CRS.Simple = Simple;
   var Layer = Evented.extend({
 	options: {
 		pane: 'overlayPane',
@@ -6393,7 +6299,6 @@
 	},
 	_updateOpacity: function () {
 		if (!this._map) { return; }
-		if (Browser.ielt9) { return; }
 		setOpacity(this._container, this.options.opacity);
 		var now = +new Date(),
 		    nextFrame = false,
@@ -7457,107 +7362,6 @@
   function canvas(options) {
 	return Browser.canvas ? new Canvas(options) : null;
   }
-  var vmlCreate = (function () {
-	try {
-		document.namespaces.add('lvml', 'urn:schemas-microsoft-com:vml');
-		return function (name) {
-			return document.createElement('<lvml:' + name + ' class="lvml">');
-		};
-	} catch (e) {
-	}
-	return function (name) {
-		return document.createElement('<' + name + ' xmlns="urn:schemas-microsoft.com:vml" class="lvml">');
-	};
-  })();
-  var vmlMixin = {
-	_initContainer: function () {
-		this._container = create$1('div', 'atlas-vml-container');
-	},
-	_update: function () {
-		if (this._map._animatingZoom) { return; }
-		Renderer.prototype._update.call(this);
-		this.fire('update');
-	},
-	_initPath: function (layer) {
-		var container = layer._container = vmlCreate('shape');
-		addClass(container, 'atlas-vml-shape ' + (this.options.className || ''));
-		container.coordsize = '1 1';
-		layer._path = vmlCreate('path');
-		container.appendChild(layer._path);
-		this._updateStyle(layer);
-		this._layers[stamp(layer)] = layer;
-	},
-	_addPath: function (layer) {
-		var container = layer._container;
-		this._container.appendChild(container);
-		if (layer.options.interactive) {
-			layer.addInteractiveTarget(container);
-		}
-	},
-	_removePath: function (layer) {
-		var container = layer._container;
-		remove(container);
-		layer.removeInteractiveTarget(container);
-		delete this._layers[stamp(layer)];
-	},
-	_updateStyle: function (layer) {
-		var stroke = layer._stroke,
-		    fill = layer._fill,
-		    options = layer.options,
-		    container = layer._container;
-		container.stroked = !!options.stroke;
-		container.filled = !!options.fill;
-		if (options.stroke) {
-			if (!stroke) {
-				stroke = layer._stroke = vmlCreate('stroke');
-			}
-			container.appendChild(stroke);
-			stroke.weight = options.weight + 'px';
-			stroke.color = options.color;
-			stroke.opacity = options.opacity;
-			if (options.dashArray) {
-				stroke.dashStyle = isArray(options.dashArray) ?
-				    options.dashArray.join(' ') :
-				    options.dashArray.replace(/( *, *)/g, ' ');
-			} else {
-				stroke.dashStyle = '';
-			}
-			stroke.endcap = options.lineCap.replace('butt', 'flat');
-			stroke.joinstyle = options.lineJoin;
-		} else if (stroke) {
-			container.removeChild(stroke);
-			layer._stroke = null;
-		}
-		if (options.fill) {
-			if (!fill) {
-				fill = layer._fill = vmlCreate('fill');
-			}
-			container.appendChild(fill);
-			fill.color = options.fillColor || options.color;
-			fill.opacity = options.fillOpacity;
-		} else if (fill) {
-			container.removeChild(fill);
-			layer._fill = null;
-		}
-	},
-	_updateCircle: function (layer) {
-		var p = layer._point.round(),
-		    r = Math.round(layer._radius),
-		    r2 = Math.round(layer._radiusY || r);
-		this._setPath(layer, layer._empty() ? 'M0 0' :
-			'AL ' + p.x + ',' + p.y + ' ' + r + ',' + r2 + ' 0,' + (65535 * 360));
-	},
-	_setPath: function (layer, path) {
-		layer._path.v = path;
-	},
-	_bringToFront: function (layer) {
-		toFront(layer._container);
-	},
-	_bringToBack: function (layer) {
-		toBack(layer._container);
-	}
-  };
-  var create = Browser.vml ? vmlCreate : svgCreate;
   var SVG = Renderer.extend({
 	_initContainer: function () {
 		this._container = create('svg');
@@ -7667,11 +7471,8 @@
 		toBack(layer._path);
 	}
   });
-  if (Browser.vml) {
-	SVG.include(vmlMixin);
-  }
   function svg(options) {
-	return Browser.svg || Browser.vml ? new SVG(options) : null;
+	return Browser.svg ? new SVG(options) : null;
   }
   Map.include({
 	getRenderer: function (layer) {
