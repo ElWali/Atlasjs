@@ -3252,7 +3252,7 @@
   var scale = function (options) {
 	return new Scale(options);
   };
- var MoroccanFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="atlas-attribution-flag"><rect width="12" height="8" fill="#c1272d"/><path d="M6 2l1.176 3.608H3.824L5 3.392 6 2z" fill="#006233"/></svg>';
+ var ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="atlas-attribution-flag"><rect width="12" height="8" fill="#c1272d"/><path d="M6 2l1.176 3.608H3.824L5 3.392 6 2z" fill="#006233"/></svg>';
  var Attribution = Control.extend({
 	options: {
 		position: 'bottomright',
