@@ -4014,45 +4014,46 @@
   var featureGroup = function (layers, options) {
 	return new FeatureGroup(layers, options);
   };
-  var Icon = Class.extend({
-	options: {
-		popupAnchor: [0, 0],
-		tooltipAnchor: [0, 0],
-		crossOrigin: false
-	},
-	initialize: function (options) {
-		setOptions(this, options);
-	},
-	createIcon: function (oldIcon) {
+class Icon {
+	constructor(options) {
+		this.options = Object.create(this.constructor.prototype.options);
+		for (const i in options) {
+			this.options[i] = options[i];
+		}
+	}
+
+	createIcon(oldIcon) {
 		return this._createIcon('icon', oldIcon);
-	},
-	createShadow: function (oldIcon) {
+	}
+
+	createShadow(oldIcon) {
 		return this._createIcon('shadow', oldIcon);
-	},
-	_createIcon: function (name, oldIcon) {
-		var src = this._getIconUrl(name);
+	}
+
+	_createIcon(name, oldIcon) {
+		const src = this._getIconUrl(name);
 		if (!src) {
 			if (name === 'icon') {
 				throw new Error('iconUrl not set in Icon options (see the docs).');
 			}
 			return null;
 		}
-		var img = this._createImg(src, oldIcon && oldIcon.tagName === 'IMG' ? oldIcon : null);
+		const img = this._createImg(src, oldIcon && oldIcon.tagName === 'IMG' ? oldIcon : null);
 		this._setIconStyles(img, name);
 		if (this.options.crossOrigin || this.options.crossOrigin === '') {
 			img.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
 		}
 		return img;
-	},
-	_setIconStyles: function (img, name) {
-		var options = this.options;
-		var sizeOption = options[name + 'Size'];
+	}
+
+	_setIconStyles(img, name) {
+		const options = this.options;
+		let sizeOption = options[name + 'Size'];
 		if (typeof sizeOption === 'number') {
 			sizeOption = [sizeOption, sizeOption];
 		}
-		var size = toPoint(sizeOption),
-		    anchor = toPoint(name === 'shadow' && options.shadowAnchor || options.iconAnchor ||
-		            size && size.divideBy(2, true));
+		const size = toPoint(sizeOption);
+		const anchor = toPoint((name === 'shadow' && options.shadowAnchor) || options.iconAnchor || (size && size.divideBy(2, true)));
 		img.className = 'atlas-marker-' + name + ' ' + (options.className || '');
 		if (anchor) {
 			img.style.marginLeft = (-anchor.x) + 'px';
@@ -4062,56 +4063,70 @@
 			img.style.width  = size.x + 'px';
 			img.style.height = size.y + 'px';
 		}
-	},
-	_createImg: function (src, el) {
+	}
+
+	_createImg(src, el) {
 		el = el || document.createElement('img');
 		el.src = src;
 		return el;
-	},
-	_getIconUrl: function (name) {
+	}
+
+	_getIconUrl(name) {
 		return Browser.retina && this.options[name + 'RetinaUrl'] || this.options[name + 'Url'];
 	}
-  });
-  function icon(options) {
+}
+
+Icon.prototype.options = {
+	popupAnchor: [0, 0],
+	tooltipAnchor: [0, 0],
+	crossOrigin: false
+};
+
+function icon(options) {
 	return new Icon(options);
-  }
-  var IconDefault = Icon.extend({
-	options: {
-		iconUrl:       'marker-icon.png',
-		iconRetinaUrl: 'marker-icon-2x.png',
-		shadowUrl:     'marker-shadow.png',
-		iconSize:    [25, 41],
-		iconAnchor:  [12, 41],
-		popupAnchor: [1, -34],
-		tooltipAnchor: [16, -28],
-		shadowSize:  [41, 41]
-	},
-	_getIconUrl: function (name) {
+}
+
+class IconDefault extends Icon {
+	_getIconUrl(name) {
 		if (typeof IconDefault.imagePath !== 'string') {
 			IconDefault.imagePath = this._detectIconPath();
 		}
-		return (this.options.imagePath || IconDefault.imagePath) + Icon.prototype._getIconUrl.call(this, name);
-	},
-	_stripUrl: function (path) {
-		var strip = function (str, re, idx) {
-			var match = re.exec(str);
+		return (this.options.imagePath || IconDefault.imagePath) + super._getIconUrl(name);
+	}
+
+	_stripUrl(path) {
+		const strip = function (str, re, idx) {
+			const match = re.exec(str);
 			return match && match[idx];
 		};
 		path = strip(path, /^url\((['"])?(.+)\1\)$/, 2);
 		return path && strip(path, /^(.*)marker-icon\.png$/, 1);
-	},
-	_detectIconPath: function () {
-		var el = create$1('div',  'atlas-default-icon-path', document.body);
-		var path = getStyle(el, 'background-image') ||
-		           getStyle(el, 'backgroundImage');	// IE8
+	}
+
+	_detectIconPath() {
+		const el = create$1('div', 'atlas-default-icon-path', document.body);
+		let path = getStyle(el, 'background-image') ||
+				   getStyle(el, 'backgroundImage'); // IE8
 		document.body.removeChild(el);
 		path = this._stripUrl(path);
 		if (path) { return path; }
-		var link = document.querySelector('link[href$="atlas.css"]');
+		const link = document.querySelector('link[href$="atlas.css"]');
 		if (!link) { return ''; }
-		return link.href.substring(0, link.href.length - 'atlas.css'.length - 1);
+		return link.href.substring(0, link.href.length - 'atlas.css'.length) + 'images/';
 	}
-  });
+}
+
+IconDefault.prototype.options = Object.create(Icon.prototype.options);
+Object.assign(IconDefault.prototype.options, {
+	iconUrl:       'marker-icon.png',
+	iconRetinaUrl: 'marker-icon-2x.png',
+	shadowUrl:     'marker-shadow.png',
+	iconSize:    [25, 41],
+	iconAnchor:  [12, 41],
+	popupAnchor: [1, -34],
+	tooltipAnchor: [16, -28],
+	shadowSize:  [41, 41]
+});
   /*
    * atlas.Handler.MarkerDrag is used internally by atlas.Marker to make the markers draggable.
    */
@@ -6143,36 +6158,42 @@
 		this._tooltip.setLatLng(latlng);
 	}
   });
-  var DivIcon = Icon.extend({
-	options: {
-		iconSize: [12, 12],
-		html: false,
-		bgPos: null,
-		className: 'atlas-div-icon'
-	},
-	createIcon: function (oldIcon) {
-		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
-		    options = this.options;
+class DivIcon extends Icon {
+	createIcon(oldIcon) {
+		const div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div');
+		const options = this.options;
+
 		if (options.html instanceof Element) {
 			empty(div);
 			div.appendChild(options.html);
 		} else {
 			div.innerHTML = options.html !== false ? options.html : '';
 		}
+
 		if (options.bgPos) {
-			var bgPos = toPoint(options.bgPos);
-			div.style.backgroundPosition = (-bgPos.x) + 'px ' + (-bgPos.y) + 'px';
+			const bgPos = toPoint(options.bgPos);
+			div.style.backgroundPosition = `${-bgPos.x}px ${-bgPos.y}px`;
 		}
 		this._setIconStyles(div, 'icon');
 		return div;
-	},
-	createShadow: function () {
+	}
+
+	createShadow() {
 		return null;
 	}
-  });
-  function divIcon(options) {
+}
+
+DivIcon.prototype.options = Object.create(Icon.prototype.options);
+Object.assign(DivIcon.prototype.options, {
+	iconSize: [12, 12],
+	html: false,
+	bgPos: null,
+	className: 'atlas-div-icon'
+});
+
+function divIcon(options) {
 	return new DivIcon(options);
-  }
+}
   Icon.Default = IconDefault;
   var GridLayer = Layer.extend({
 	options: {
