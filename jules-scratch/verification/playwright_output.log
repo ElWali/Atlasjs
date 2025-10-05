@@ -1,3 +1,0 @@
-An error occurred: Page.wait_for_selector: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator(".atlas-tile-loaded") to be visible
