@@ -1014,31 +1014,12 @@
 	return str || 'M0 0';
   }
   var style = document.documentElement.style;
-  var edge = 'msLaunchUri' in navigator && !('documentMode' in document);
   var webkit = userAgentContains('webkit');
-  var android = userAgentContains('android');
-  var android23 = userAgentContains('android 2') || userAgentContains('android 3');
-  var webkitVer = parseInt(/WebKit\/([0-9]+)|$/.exec(navigator.userAgent)[1], 10);
-  var androidStock = android && userAgentContains('Google') && webkitVer < 537 && !('AudioNode' in window);
-  var opera = !!window.opera;
-  var chrome = !edge && userAgentContains('chrome');
-  var gecko = userAgentContains('gecko') && !webkit && !opera;
-  var safari = !chrome && userAgentContains('safari');
-  var phantom = userAgentContains('phantom');
-  var opera12 = 'OTransition' in style;
-  var win = navigator.platform.indexOf('Win') === 0;
-  var webkit3d = ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()) && !android23;
-  var gecko3d = 'MozPerspective' in style;
-  var any3d = !window.ATLAS_DISABLE_3D && (webkit3d || gecko3d) && !opera12 && !phantom;
+  var gecko = userAgentContains('gecko') && !webkit && !window.opera;
+  var any3d = !window.ATLAS_DISABLE_3D && ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()) && !('OTransition' in style);
   var mobile = typeof orientation !== 'undefined' || userAgentContains('mobile');
-  var mobileWebkit = mobile && webkit;
-  var mobileWebkit3d = mobile && webkit3d;
-  var msPointer = !window.PointerEvent && window.MSPointerEvent;
-  var pointer = !!(window.PointerEvent || msPointer);
-  var touchNative = 'ontouchstart' in window || !!window.TouchEvent;
-  var touch = !window.ATLAS_NO_TOUCH && (touchNative || pointer);
-  var mobileOpera = mobile && opera;
-  var mobileGecko = mobile && gecko;
+  var pointer = !!window.PointerEvent;
+  var touch = !window.ATLAS_NO_TOUCH && (('ontouchstart' in window) || !!window.TouchEvent || pointer);
   var retina = (window.devicePixelRatio || (window.screen.deviceXDPI / window.screen.logicalXDPI)) > 1;
   var passiveEvents = (function () {
 	var supportsPassiveOption = false;
@@ -1063,115 +1044,8 @@
 	div.innerHTML = '<svg/>';
 	return (div.firstChild && div.firstChild.namespaceURI) === 'http://www.w3.org/2000/svg';
   })();
-  var mac = navigator.platform.indexOf('Mac') === 0;
-  var linux = navigator.platform.indexOf('Linux') === 0;
   function userAgentContains(str) {
 	return navigator.userAgent.toLowerCase().indexOf(str) >= 0;
-  }
-  var Browser = {
-	edge: edge,
-	webkit: webkit,
-	android: android,
-	android23: android23,
-	androidStock: androidStock,
-	opera: opera,
-	chrome: chrome,
-	gecko: gecko,
-	safari: safari,
-	phantom: phantom,
-	opera12: opera12,
-	win: win,
-	webkit3d: webkit3d,
-	gecko3d: gecko3d,
-	any3d: any3d,
-	mobile: mobile,
-	mobileWebkit: mobileWebkit,
-	mobileWebkit3d: mobileWebkit3d,
-	msPointer: msPointer,
-	pointer: pointer,
-	touch: touch,
-	touchNative: touchNative,
-	mobileOpera: mobileOpera,
-	mobileGecko: mobileGecko,
-	retina: retina,
-	passiveEvents: passiveEvents,
-	canvas: canvas$1,
-	svg: svg$1,
-	inlineSvg: inlineSvg,
-	mac: mac,
-	linux: linux
-  };
-  var POINTER_DOWN =   Browser.msPointer ? 'MSPointerDown'   : 'pointerdown';
-  var POINTER_MOVE =   Browser.msPointer ? 'MSPointerMove'   : 'pointermove';
-  var POINTER_UP =     Browser.msPointer ? 'MSPointerUp'     : 'pointerup';
-  var POINTER_CANCEL = Browser.msPointer ? 'MSPointerCancel' : 'pointercancel';
-  var pEvent = {
-	touchstart  : POINTER_DOWN,
-	touchmove   : POINTER_MOVE,
-	touchend    : POINTER_UP,
-	touchcancel : POINTER_CANCEL
-  };
-  var handle = {
-	touchstart  : _onPointerStart,
-	touchmove   : _handlePointer,
-	touchend    : _handlePointer,
-	touchcancel : _handlePointer
-  };
-  var _pointers = {};
-  var _pointerDocListener = false;
-  function addPointerListener(obj, type, handler) {
-	if (type === 'touchstart') {
-		_addPointerDocListener();
-	}
-	if (!handle[type]) {
-		console.warn('wrong event specified:', type);
-		return falseFn;
-	}
-	handler = handle[type].bind(this, handler);
-	obj.addEventListener(pEvent[type], handler, false);
-	return handler;
-  }
-  function removePointerListener(obj, type, handler) {
-	if (!pEvent[type]) {
-		console.warn('wrong event specified:', type);
-		return;
-	}
-	obj.removeEventListener(pEvent[type], handler, false);
-  }
-  function _globalPointerDown(e) {
-	_pointers[e.pointerId] = e;
-  }
-  function _globalPointerMove(e) {
-	if (_pointers[e.pointerId]) {
-		_pointers[e.pointerId] = e;
-	}
-  }
-  function _globalPointerUp(e) {
-	delete _pointers[e.pointerId];
-  }
-  function _addPointerDocListener() {
-	if (!_pointerDocListener) {
-		document.addEventListener(POINTER_DOWN, _globalPointerDown, true);
-		document.addEventListener(POINTER_MOVE, _globalPointerMove, true);
-		document.addEventListener(POINTER_UP, _globalPointerUp, true);
-		document.addEventListener(POINTER_CANCEL, _globalPointerUp, true);
-		_pointerDocListener = true;
-	}
-  }
-  function _handlePointer(handler, e) {
-	if (e.pointerType === (e.MSPOINTER_TYPE_MOUSE || 'mouse')) { return; }
-	e.touches = [];
-	for (var i in _pointers) {
-		e.touches.push(_pointers[i]);
-	}
-	e.changedTouches = [e];
-	handler(e);
-  }
-  function _onPointerStart(handler, e) {
-	if (e.MSPOINTER_TYPE_TOUCH && e.pointerType === e.MSPOINTER_TYPE_TOUCH) {
-		preventDefault(e);
-	}
-	_handlePointer(handler, e);
   }
   function makeDblclick(event) {
 	var newEvent = {},
@@ -1494,11 +1368,6 @@
 		}
 	}
   }
-  var mouseSubst = {
-	mouseenter: 'mouseover',
-	mouseleave: 'mouseout',
-	wheel: !('onwheel' in window) && 'mousewheel'
-  };
   function addOne(obj, type, fn, context) {
 	var id = type + stamp(fn) + (context ? '_' + stamp(context) : '');
 	if (obj[eventsKey] && obj[eventsKey][id]) { return this; }
@@ -1506,13 +1375,11 @@
 		return fn.call(context || obj, e || window.event);
 	};
 	var originalHandler = handler;
-	if (!Browser.touchNative && Browser.pointer && type.indexOf('touch') === 0) {
-		handler = addPointerListener(obj, type, handler);
-	} else if (Browser.touch && (type === 'dblclick')) {
+	if (touch && (type === 'dblclick')) {
 		handler = addDoubleTapListener(obj, handler);
 	} else if ('addEventListener' in obj) {
 		if (type === 'touchstart' || type === 'touchmove' || type === 'wheel' ||  type === 'mousewheel') {
-			obj.addEventListener(mouseSubst[type] || type, handler, Browser.passiveEvents ? {passive: false} : false);
+			obj.addEventListener(type, handler, passiveEvents ? {passive: false} : false);
 		} else if (type === 'mouseenter' || type === 'mouseleave') {
 			handler = function (e) {
 				e = e || window.event;
@@ -1520,12 +1387,10 @@
 					originalHandler(e);
 				}
 			};
-			obj.addEventListener(mouseSubst[type], handler, false);
+			obj.addEventListener(type, handler, false);
 		} else {
 			obj.addEventListener(type, originalHandler, false);
 		}
-	} else {
-		obj.attachEvent('on' + type, handler);
 	}
 	obj[eventsKey] = obj[eventsKey] || {};
 	obj[eventsKey][id] = handler;
@@ -1534,14 +1399,10 @@
 	id = id || type + stamp(fn) + (context ? '_' + stamp(context) : '');
 	var handler = obj[eventsKey] && obj[eventsKey][id];
 	if (!handler) { return this; }
-	if (!Browser.touchNative && Browser.pointer && type.indexOf('touch') === 0) {
-		removePointerListener(obj, type, handler);
-	} else if (Browser.touch && (type === 'dblclick')) {
+	if (touch && (type === 'dblclick')) {
 		removeDoubleTapListener(obj, handler);
 	} else if ('removeEventListener' in obj) {
-		obj.removeEventListener(mouseSubst[type] || type, handler, false);
-	} else {
-		obj.detachEvent('on' + type, handler);
+		obj.removeEventListener(type, handler, false);
 	}
 	obj[eventsKey][id] = null;
   }
@@ -1600,20 +1461,8 @@
 		(e.clientY - offset.top) / scale.y - container.clientTop
 	);
   }
-  var wheelPxFactor =
-	(Browser.linux && Browser.chrome) ? window.devicePixelRatio :
-	Browser.mac ? window.devicePixelRatio * 3 :
-	window.devicePixelRatio > 0 ? 2 * window.devicePixelRatio : 1;
   function getWheelDelta(e) {
-	return (Browser.edge) ? e.wheelDeltaY / 2 :
-	       (e.deltaY && e.deltaMode === 0) ? -e.deltaY / wheelPxFactor :
-	       (e.deltaY && e.deltaMode === 1) ? -e.deltaY * 20 :
-	       (e.deltaY && e.deltaMode === 2) ? -e.deltaY * 60 :
-	       (e.deltaX || e.deltaZ) ? 0 :
-	       e.wheelDelta ? (e.wheelDeltaY || e.wheelDelta) / 2 :
-	       (e.detail && Math.abs(e.detail) < 32765) ? -e.detail * 20 :
-	       e.detail ? e.detail / -32765 * 60 :
-	       0;
+	return e.deltaY / (e.deltaMode === 1 ? 20 : 1);
   }
   function isExternalTarget(el, e) {
 	var related = e.relatedTarget;
@@ -3334,7 +3183,6 @@
 	return this;
   };
   var Mixin = {Events: Events};
-  var START = Browser.touch ? 'touchstart mousedown' : 'mousedown';
   var Draggable = Evented.extend({
 	options: {
 		clickTolerance: 3
@@ -3347,7 +3195,7 @@
 	},
 	enable: function () {
 		if (this._enabled) { return; }
-		on(this._dragStartTarget, START, this._onDown, this);
+		on(this._dragStartTarget, 'mousedown touchstart', this._onDown, this);
 		this._enabled = true;
 	},
 	disable: function () {
@@ -3355,7 +3203,7 @@
 		if (Draggable._dragging === this) {
 			this.finishDrag(true);
 		}
-		off(this._dragStartTarget, START, this._onDown, this);
+		off(this._dragStartTarget, 'mousedown touchstart', this._onDown, this);
 		this._enabled = false;
 		this._moved = false;
 	},
@@ -7332,125 +7180,13 @@
 	}
   });
   function canvas(options) {
-	return Browser.canvas ? new Canvas(options) : null;
-  }
-  var SVG = Renderer.extend({
-	_initContainer: function () {
-		this._container = create('svg');
-		this._container.setAttribute('pointer-events', 'none');
-		this._rootGroup = create('g');
-		this._container.appendChild(this._rootGroup);
-	},
-	_destroyContainer: function () {
-		remove(this._container);
-		off(this._container);
-		delete this._container;
-		delete this._rootGroup;
-		delete this._svgSize;
-	},
-	_update: function () {
-		if (this._map._animatingZoom && this._bounds) { return; }
-		Renderer.prototype._update.call(this);
-		var b = this._bounds,
-		    size = b.getSize(),
-		    container = this._container;
-		if (!this._svgSize || !this._svgSize.equals(size)) {
-			this._svgSize = size;
-			container.setAttribute('width', size.x);
-			container.setAttribute('height', size.y);
-		}
-		setPosition(container, b.min);
-		container.setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
-		this.fire('update');
-	},
-	_initPath: function (layer) {
-		var path = layer._path = create('path');
-		if (layer.options.className) {
-			addClass(path, layer.options.className);
-		}
-		if (layer.options.interactive) {
-			addClass(path, 'atlas-interactive');
-		}
-		this._updateStyle(layer);
-		this._layers[stamp(layer)] = layer;
-	},
-	_addPath: function (layer) {
-		if (!this._rootGroup) { this._initContainer(); }
-		this._rootGroup.appendChild(layer._path);
-		layer.addInteractiveTarget(layer._path);
-	},
-	_removePath: function (layer) {
-		remove(layer._path);
-		layer.removeInteractiveTarget(layer._path);
-		delete this._layers[stamp(layer)];
-	},
-	_updatePath: function (layer) {
-		layer._project();
-		layer._update();
-	},
-	_updateStyle: function (layer) {
-		var path = layer._path,
-		    options = layer.options;
-		if (!path) { return; }
-		if (options.stroke) {
-			path.setAttribute('stroke', options.color);
-			path.setAttribute('stroke-opacity', options.opacity);
-			path.setAttribute('stroke-width', options.weight);
-			path.setAttribute('stroke-linecap', options.lineCap);
-			path.setAttribute('stroke-linejoin', options.lineJoin);
-			if (options.dashArray) {
-				path.setAttribute('stroke-dasharray', options.dashArray);
-			} else {
-				path.removeAttribute('stroke-dasharray');
-			}
-			if (options.dashOffset) {
-				path.setAttribute('stroke-dashoffset', options.dashOffset);
-			} else {
-				path.removeAttribute('stroke-dashoffset');
-			}
-		} else {
-			path.setAttribute('stroke', 'none');
-		}
-		if (options.fill) {
-			path.setAttribute('fill', options.fillColor || options.color);
-			path.setAttribute('fill-opacity', options.fillOpacity);
-			path.setAttribute('fill-rule', options.fillRule || 'evenodd');
-		} else {
-			path.setAttribute('fill', 'none');
-		}
-	},
-	_updatePoly: function (layer, closed) {
-		this._setPath(layer, pointsToPath(layer._parts, closed));
-	},
-	_updateCircle: function (layer) {
-		var p = layer._point,
-		    r = Math.max(Math.round(layer._radius), 1),
-		    r2 = Math.max(Math.round(layer._radiusY), 1) || r,
-		    arc = 'a' + r + ',' + r2 + ' 0 1,0 ';
-		var d = layer._empty() ? 'M0 0' :
-			'M' + (p.x - r) + ',' + p.y +
-			arc + (r * 2) + ',0 ' +
-			arc + (-r * 2) + ',0 ';
-		this._setPath(layer, d);
-	},
-	_setPath: function (layer, path) {
-		layer._path.setAttribute('d', path);
-	},
-	_bringToFront: function (layer) {
-		toFront(layer._path);
-	},
-	_bringToBack: function (layer) {
-		toBack(layer._path);
-	}
-  });
-  function svg(options) {
-	return Browser.svg ? new SVG(options) : null;
+	return new Canvas(options);
   }
   Map.include({
 	getRenderer: function (layer) {
 		var renderer = layer.options.renderer || this._getPaneRenderer(layer.options.pane) || this.options.renderer || this._renderer;
 		if (!renderer) {
-			renderer = this._renderer = this._createRenderer();
+			renderer = this._renderer = canvas(this.options);
 		}
 		if (!this.hasLayer(renderer)) {
 			this.addLayer(renderer);
@@ -7463,13 +7199,13 @@
 		}
 		var renderer = this._paneRenderers[name];
 		if (renderer === undefined) {
-			renderer = this._createRenderer({pane: name});
+			renderer = canvas({pane: name});
 			this._paneRenderers[name] = renderer;
 		}
 		return renderer;
 	},
 	_createRenderer: function (options) {
-		return (this.options.preferCanvas && canvas(options)) || svg(options);
+		return canvas(options);
 	}
   });
   var Rectangle = Polygon.extend({
@@ -7942,66 +7678,8 @@
 	}
   });
   Map.addInitHook('addHandler', 'scrollWheelZoom', ScrollWheelZoom);
-  var tapHoldDelay = 600;
   Map.mergeOptions({
-	tapHold: Browser.touchNative && Browser.safari && Browser.mobile,
-	tapTolerance: 15
-  });
-  var TapHold = Handler.extend({
-	addHooks: function () {
-		on(this._map._container, 'touchstart', this._onDown, this);
-	},
-	removeHooks: function () {
-		off(this._map._container, 'touchstart', this._onDown, this);
-	},
-	_onDown: function (e) {
-		clearTimeout(this._holdTimeout);
-		if (e.touches.length !== 1) { return; }
-		var first = e.touches[0];
-		this._startPos = this._newPos = new Point(first.clientX, first.clientY);
-		this._holdTimeout = setTimeout(bind(function () {
-			this._cancel();
-			if (!this._isTapValid()) { return; }
-			on(document, 'touchend', preventDefault);
-			on(document, 'touchend touchcancel', this._cancelClickPrevent);
-			this._simulateEvent('contextmenu', first);
-		}, this), tapHoldDelay);
-		on(document, 'touchend touchcancel contextmenu', this._cancel, this);
-		on(document, 'touchmove', this._onMove, this);
-	},
-	_cancelClickPrevent: function cancelClickPrevent() {
-		off(document, 'touchend', preventDefault);
-		off(document, 'touchend touchcancel', cancelClickPrevent);
-	},
-	_cancel: function () {
-		clearTimeout(this._holdTimeout);
-		off(document, 'touchend touchcancel contextmenu', this._cancel, this);
-		off(document, 'touchmove', this._onMove, this);
-	},
-	_onMove: function (e) {
-		var first = e.touches[0];
-		this._newPos = new Point(first.clientX, first.clientY);
-	},
-	_isTapValid: function () {
-		return this._newPos.distanceTo(this._startPos) <= this._map.options.tapTolerance;
-	},
-	_simulateEvent: function (type, e) {
-		var simulatedEvent = new MouseEvent(type, {
-			bubbles: true,
-			cancelable: true,
-			view: window,
-			screenX: e.screenX,
-			screenY: e.screenY,
-			clientX: e.clientX,
-			clientY: e.clientY,
-		});
-		simulatedEvent._simulated = true;
-		e.target.dispatchEvent(simulatedEvent);
-	}
-  });
-  Map.addInitHook('addHandler', 'tapHold', TapHold);
-  Map.mergeOptions({
-	touchZoom: Browser.touch,
+	touchZoom: touch,
 	bounceAtZoomLimits: true
   });
   var TouchZoom = Handler.extend({
@@ -8083,10 +7761,8 @@
   Map.Drag = Drag;
   Map.Keyboard = Keyboard;
   Map.ScrollWheelZoom = ScrollWheelZoom;
-  Map.TapHold = TapHold;
   Map.TouchZoom = TouchZoom;
   exports.Bounds = Bounds;
-  exports.Browser = Browser;
   exports.CRS = CRS;
   exports.Canvas = Canvas;
   exports.Circle = Circle;
