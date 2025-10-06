@@ -8,7 +8,7 @@
 - Ensure proper spacing, line breaks (80-char limit where reasonable)
 - Modernize function expressions to arrow functions where appropriate
 - Preserve UMD wrapper and public API
-- Keep all functionality 
+- Keep all functionality intact.
 
 
 
