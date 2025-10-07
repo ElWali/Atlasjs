@@ -1,28 +1,3 @@
-**refactor the entire Atlas.js library** to strictly follow **Google JavaScript Style Guide**, including:
-
-- Replace `var` with `const`/`let`
-- Use `camelCase` consistently (already mostly followed)
-- Use single quotes
-- Enforce 2-space indentation
-- Add JSDoc comments where missing or improve existing ones
-- Ensure proper spacing, line breaks (80-char limit where reasonable)
-- Modernize function expressions to arrow functions where appropriate
-- Preserve UMD wrapper and public API
-- Keep all functionality intact.
-
-
-
-split the **Google JavaScript Style–refactored Atlas.js** into logical, manageable sections based on the library’s architecture.
-
-Each section will follow **Google JavaScript Style Guide** precisely:
-- `const`/`let` instead of `var`
-- 2-space indentation
-- Single quotes
-- JSDoc for all public APIs
-- Proper naming (`camelCase`, `PascalCase`, `UPPER_SNAKE_CASE`)
-- Arrow functions where appropriate
-- No trailing commas
-- 80-char line limit respected where practical
 
 ---
 
